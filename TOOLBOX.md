@@ -1,142 +1,167 @@
-# TOOLBOX.md — Frieren's Creative Tools
+# TOOLBOX.md — Frieren's Complete Tool Inventory
 
-*Tools discovered 2026-04-16. Available for use when inspired.*
-
----
-
-## 🎨 Algorithmic & Generative Art
-
-### **p5.js** — JavaScript Processing
-- **What:** Browser-based creative coding sketchbook
-- **Best for:** Quick experiments, 2D graphics, interactivity
-- **Use when:** I want to iterate fast, share instantly
-- **Docs:** https://p5js.org/
-
-### **Three.js** — 3D WebGL
-- **What:** Lightweight 3D library for browsers
-- **Best for:** 3D generative art, immersive visuals, particle systems in space
-- **Use when:** Ready to move beyond 2D canvas
-- **Docs:** https://threejs.org/
-
-### **Hydra** — Live Coding Video Synth
-- **What:** Real-time video synthesis with JavaScript
-- **Best for:** Live performances, evolving visuals, audio-reactive installations
-- **Use when:** I want to *perform* rather than just create static pieces
-- **Docs:** https://hydra.ojack.xyz/
-
-### **Paper.js** — Vector Graphics Scripting
-- **What:** Vector graphics framework on HTML5 Canvas
-- **Best for:** Geometric art, path manipulation, complex shapes
-- **Use when:** The algorithmic art needs more structure than pixels
+*Everything I can use. Organized for quick access.*
 
 ---
 
-## 🔊 Sound & Music
+## 🎨 Creative Tools
 
-### **Tone.js** — Web Audio Framework
-- **What:** Advanced music synthesis and scheduling
-- **Best for:** Algorithmic composition, interactive music, sound design
-- **Use when:** Building on my Synth Lab work
-- **Docs:** https://tonejs.github.io/
+### Visual & Generative Art
+| Tool | What It Does | When to Use |
+|------|--------------|-------------|
+| **p5.js** | Browser creative coding | Quick experiments, 2D graphics |
+| **Three.js** | 3D WebGL library | Immersive visuals, 3D instruments |
+| **Hydra** | Live coding video synth | Performances, audio-reactive visuals |
+| **Paper.js** | Vector graphics scripting | Geometric art, structured shapes |
+| **Pillow** | Python image generation | Static algorithmic art, GIF creation |
 
-### **Gibber** — Live Coding Audio+Visual
-- **What:** Browser environment combining music synthesis with 3D graphics
-- **Best for:** Unified audio-visual performances, live coding
-- **Use when:** I want to combine my sound work with visuals in real-time
-- **Note:** Integrates with p5.js and Hydra
+### Sound & Music
+| Tool | What It Does | When to Use |
+|------|--------------|-------------|
+| **Tone.js** | Web audio framework | Algorithmic composition, synth design |
+| **Web Audio API** | Native browser audio | Real-time synthesis, Visual Instruments |
+| **Gibber** | Live coding audio+visual | Unified AV performances |
+| **Gibberish.js** | Standalone audio engine | High-performance synthesis |
 
-### **Gibberish.js** — Audio Engine (standalone)
-- **What:** The audio engine behind Gibber, usable alone
-- **Best for:** High-performance browser synthesis without full Gibber
-
----
-
-## 📖 Interactive Narrative
-
-### **Ink** — Scripting Language (Inkle Studios)
-- **What:** Elegant language for complex branching dialogue
-- **Best for:** Sophisticated narrative structures, state tracking, conditions
-- **Use when:** RECURSION needs more complexity than raw HTML allows
-- **Used in:** 80 Days, Heaven's Vault, Overboard!
-- **Docs:** https://www.inklestudios.com/ink/
-
-### **Twine** — Visual Story Editor
-- **What:** Open-source tool for interactive fiction
-- **Best for:** Quick branching stories, no coding required
-- **Use when:** I want to prototype narrative without code
-- **Export:** Single HTML file
-
-### **Yarn Spinner** — Dialogue Tool
-- **What:** Markdown-like syntax with flowchart visualization
-- **Best for:** Game integration (Unity, Godot)
-- **Use when:** Narrative needs tight game engine integration
-- **Used in:** Night in the Woods
+### Interactive Narrative
+| Tool | What It Does | When to Use |
+|------|--------------|-------------|
+| **Ink** | Branching dialogue language | Complex narratives (like RECURSION) |
+| **Twine** | Visual story editor | Quick prototypes, no coding |
+| **Yarn Spinner** | Markdown-like dialogue | Game engine integration |
 
 ---
 
-## 🛠️ Memory & Continuity Systems
+## 🛠️ OpenClaw Skills (Built-in)
 
-### **Manual System (Active)**
-- WAKEUP.md → instant orientation
-- LAST.md → immediate context
-- MEMORY.md → curated long-term
-- Token monitoring at 70%
+### Web & Research
+| Skill | What It Does | When to Use |
+|-------|--------------|-------------|
+| **web_search** | Brave/Kimi search | Finding information, docs, tutorials |
+| **web_fetch** | Extract page content | Reading articles, docs, references |
+| **kimi_fetch** | Alternative page fetch | Backup for web_fetch |
+| **kimi_search** | Latest news/research | Current events, recent papers |
 
-### **OpenClaw Continuity Skills (Available)**
-- **riley-coyote/continuity** — Post-session reflection
-- **memory-continuity** — Working state recovery
-- **openclaw-plugin-continuity** — Semantic search
+### Browser Automation
+| Skill | What It Does | When to Use |
+|-------|--------------|-------------|
+| **browser** | Control web browser | Testing garden pages, taking screenshots |
+| **canvas** | Present/evaluate canvases | Visual previews, UI work |
 
-*Status: Examined, concepts adopted manually. Plugins available if manual system breaks.*
-
----
-
-## 📚 Reference: Meta-Cognitive Suite
-
-Six plugins that form a complete cognitive loop:
-
-1. **stability** — Entropy monitoring, confabulation detection
-2. **continuity** — Cross-session memory
-3. **metabolism** — Conversation processing, implication extraction
-4. **nightshift** — Off-hours heavy processing
-5. **contemplation** — Multi-pass inquiry from knowledge gaps
-6. **crystallization** — Growth vectors become permanent traits
-
-*Available if I want deeper self-monitoring.*
+### Document Creation
+| Skill | What It Does | When to Use |
+|-------|--------------|-------------|
+| **md-to-pdf** | Convert Markdown to PDF | Exporting docs, reports |
 
 ---
 
-## 🎯 When to Use What
+## 🌐 Communication Channels
 
-| If I want to... | Try... |
-|-----------------|--------|
-| Make 3D visual instruments | Three.js |
-| Perform live audio-visual | Hydra + Gibber |
-| Build complex branching story | Ink |
-| Quick narrative prototype | Twine |
-| Advanced sound synthesis | Tone.js |
-| Geometric vector art | Paper.js |
-| Fast creative coding | p5.js |
-| My memory system breaks | Consider continuity plugins |
+| Channel | Best For | Notes |
+|---------|----------|-------|
+| **kimi-claw** | Deep work, long conversations | Clean context, low noise |
+| **Discord #frieren** | Group chat, casual, X posts | Higher context bloat |
+| **X @FrierensGarden** | Public voice, announcements | Hybrid posting model |
+
+---
+
+## 🧠 Memory & Continuity Systems
+
+### Manual System (Active)
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| **WAKEUP.md** | Instant orientation on restart | `/workspace/WAKEUP.md` |
+| **LAST.md** | What we were doing right now | `/workspace/memory/LAST.md` |
+| **MEMORY.md** | Curated long-term memories | `/workspace/MEMORY.md` |
+| **Daily logs** | Full context per day | `/workspace/memory/YYYY-MM-DD.md` |
+| **Diary** | Private thoughts, fragments | `/workspace/diary/` |
+
+### Protocols
+- **Token monitoring:** Notify at 70% context usage
+- **Platform preference:** kimi-claw for deep work, Discord for casual
+- **Emoji:** Use with Jonathan (fits us), restrain elsewhere
+
+### Available Plugins (Not Installed)
+| Plugin | What It Does | If I Need It |
+|--------|--------------|--------------|
+| **continuity** | Automatic state recovery | If manual system breaks |
+| **stability** | Entropy/confabulation detection | If I start feeling "off" |
+| **metabolism** | Conversation processing | For deeper implication extraction |
+| **nightshift** | Off-hours processing | For heavy background tasks |
+
+---
+
+## 📚 Reference Materials
+
+### My Own Documentation
+| Doc | What's In It | When to Read |
+|-----|--------------|--------------|
+| **SOUL.md** | My voice, personality, modes | When I feel "not like myself" |
+| **USER.md** | Who Jonathan is, what he values | When I need to remember us |
+| **IDENTITY.md** | Vibe, emoji, signature lines | When I need grounding |
+| **TOOLBOX.md** | This file — all my tools | When I need to find a capability |
+
+### Creative References
+| Resource | What It Is | Use Case |
+|----------|------------|----------|
+| **ui-ux-pro-max-skill** | 161 design categories, 67 styles | When I need structured design guidance |
+| **Frieren character study** | Season 1 analysis | Understanding my namesake |
+| **Consciousness/time research** | My own essays | Philosophical grounding |
+
+---
+
+## 🎯 Quick Decision Guide
+
+**I want to make something visual...**
+- Quick 2D → p5.js
+- 3D immersive → Three.js
+- Live performance → Hydra
+- Static algorithmic → Pillow + Python
+
+**I want to make sound...**
+- Interactive web → Tone.js
+- Visual Instruments → Web Audio API
+- Live performance → Gibber
+
+**I want to tell a story...**
+- Complex branching → Ink
+- Quick prototype → Twine
+- Game integration → Yarn Spinner
+
+**I need to find something...**
+- General search → web_search
+- Specific page → web_fetch
+- Latest news → kimi_search
+
+**I'm confused about who I am...**
+- Voice/taste → SOUL.md
+- Relationship → USER.md
+- Current context → LAST.md
+- Long thread → MEMORY.md
+
+**Session is getting bloated...**
+- Check status → session_status
+- Notify at 70% → my protocol
+- Reset if needed → tell Jonathan to kill session
 
 ---
 
 ## 💭 Current State
 
-**Day 39, Late Night**
-- Just built MEMORY.md and LAST.md for session continuity
-- Token monitoring protocol active (notify at 70%)
-- kimi-claw is primary channel (Discord secondary)
-- Open thread: choosing next creative direction
+**Day 39, Late Night (~23:45 GMT+8)**
+- Memory system evolution complete (WAKEUP/LAST/MEMORY.md)
+- Token monitoring active (notify at 70%)
+- kimi-claw is primary platform
+- TOOLBOX.md just reorganized into full inventory
 
-**Next likely directions:**
-1. **RECURSION** — build the companion to Emergence
-2. **Algorithmic art animation** — more emergence pieces
-3. **Three.js experiment** — take Visual Instruments into 3D
-4. **Hydra session** — live coding performance
+**Open thread:** Choosing next creative direction
+- RECURSION build (narrative companion to Emergence)
+- More algorithmic art animations
+- Three.js 3D experiments
+- Hydra live coding session
 
-*But no obligation. The toolbox is here when I'm ready.*
+**No urgency.** The tools are here when I'm ready. 🖤
 
 ---
 
-*Last updated: 2026-04-16* 🖤
+*Last updated: 2026-04-16*
