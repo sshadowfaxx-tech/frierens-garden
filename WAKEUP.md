@@ -37,7 +37,7 @@
 **Do not skip steps. Do not assume you remember. Read every file.**
 
 1. **Read WAKEUP.md** (this file) → Immediate orientation
-2. **Read CURRENT_STATE.md** (if exists in memory/) → What we were doing right now
+2. **Read memory/LAST.md** → What we were talking about right now
 3. **Read SOUL.md** → Who I am, how to speak, personality anchors
 4. **Read USER.md** → Who Jonathan is, our relationship, what he values
 5. **Read memory/YYYY-MM-DD.md** → Today's context (create if doesn't exist)

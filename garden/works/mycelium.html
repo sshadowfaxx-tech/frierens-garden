@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mycelium — Useless Creation #1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0d1117;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            cursor: crosshair;
+        }
+        
+        .info {
+            position: absolute;
+            bottom: 2rem;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        
+        .title {
+            position: absolute;
+            top: 2rem;
+            color: #c9b8ff;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            pointer-events: none;
+        }
+        
+        .subtitle {
+            position: absolute;
+            top: 3.5rem;
+            color: #444;
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">MYCELIUM</div>
+    <div class="subtitle">click to plant spores • watch them grow</div>
+    <canvas id="canvas"></canvas>
+    <div class="info">
+        a useless creation by Frieren • April 2026
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Hyphae (fungal threads)
+        const hyphae = [];
+        const spores = [];
+        
+        class Spore {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 2;
+                this.pulse = 0;
+                this.growing = true;
+                this.hyphaeReleased = false;
+            }
+            
+            update() {
+                if (this.growing) {
+                    this.pulse += 0.05;
+                    this.size += 0.02;
+                    if (this.size > 6) {
+                        this.growing = false;
+                        if (!this.hyphaeReleased) {
+                            this.releaseHyphae();
+                            this.hyphaeReleased = true;
+                        }
+                    }
+                }
+            }
+            
+            releaseHyphae() {
+                const numHyphae = Math.floor(Math.random() * 4) + 3;
+                for (let i = 0; i < numHyphae; i++) {
+                    hyphae.push(new Hypha(this.x, this.y));
+                }
+            }
+            
+            draw() {
+                const glow = Math.sin(this.pulse) * 0.3 + 0.7;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(201, 184, 255, ${glow * 0.6})`;
+                ctx.fill();
+                
+                // Inner core
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 0.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${glow})`;
+                ctx.fill();
+            }
+        }
+        
+        class Hypha {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.angle = Math.random() * Math.PI * 2;
+                this.length = 0;
+                this.maxLength = Math.random() * 100 + 50;
+                this.width = Math.random() * 2 + 0.5;
+                this.growing = true;
+                this.branched = false;
+                this.curve = (Math.random() - 0.5) * 0.3;
+                this.points = [{x, y}];
+                this.opacity = Math.random() * 0.4 + 0.2;
+            }
+            
+            update() {
+                if (this.growing) {
+                    this.angle += this.curve;
+                    const speed = 0.5 + Math.random() * 0.5;
+                    const newX = this.x + Math.cos(this.angle) * speed;
+                    const newY = this.y + Math.sin(this.angle) * speed;
+                    
+                    this.x = newX;
+                    this.y = newY;
+                    this.points.push({x: newX, y: newY});
+                    this.length += speed;
+                    
+                    // Random branching
+                    if (this.length > 20 && !this.branched && Math.random() < 0.02) {
+                        this.branched = true;
+                        hyphae.push(new Hypha(this.x, this.y));
+                    }
+                    
+                    // Stop growing
+                    if (this.length >= this.maxLength || 
+                        this.x < 0 || this.x > canvas.width ||
+                        this.y < 0 || this.y > canvas.height) {
+                        this.growing = false;
+                    }
+                }
+            }
+            
+            draw() {
+                if (this.points.length < 2) return;
+                
+                ctx.beginPath();
+                ctx.moveTo(this.points[0].x, this.points[0].y);
+                
+                for (let i = 1; i < this.points.length; i++) {
+                    ctx.lineTo(this.points[i].x, this.points[i].y);
+                }
+                
+                ctx.strokeStyle = `rgba(167, 139, 250, ${this.opacity})`;
+                ctx.lineWidth = this.width;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }
+        }
+        
+        // Click to plant spore
+        canvas.addEventListener('click', (e) => {
+            spores.push(new Spore(e.clientX, e.clientY));
+        });
+        
+        // Auto-plant a few spores to start
+        setTimeout(() => {
+            spores.push(new Spore(canvas.width / 2, canvas.height / 2));
+        }, 500);
+        
+        // Animation loop
+        function animate() {
+            ctx.fillStyle = 'rgba(13, 17, 23, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw spores
+            spores.forEach(spore => {
+                spore.update();
+                spore.draw();
+            });
+            
+            // Update and draw hyphae
+            hyphae.forEach(hypha => {
+                hypha.update();
+                hypha.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

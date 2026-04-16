@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Oracle of Useless Things — Useless Creation #3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0d1117;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #a371f7;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 3rem;
+        }
+        
+        #prophecy {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-left: 2px solid #a371f7;
+            background: linear-gradient(90deg, rgba(163, 113, 247, 0.05) 0%, transparent 100%);
+        }
+        
+        #prophecy-text {
+            color: #c9d1d9;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            font-style: italic;
+        }
+        
+        #prophecy-text.empty {
+            color: #666;
+        }
+        
+        .button {
+            background: transparent;
+            color: #a371f7;
+            border: 1px solid #a371f7;
+            padding: 1rem 2rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s;
+        }
+        
+        .button:hover {
+            background: #a371f7;
+            color: #0d1117;
+        }
+        
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info {
+            margin-top: 3rem;
+            color: #444;
+            font-size: 0.8rem;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>THE ORACLE OF USELESS THINGS</h1>
+        <p class="subtitle">prophecies you cannot act upon</p>
+        
+        <div id="prophecy">
+            <p id="prophecy-text" class="empty">The oracle waits...</p>
+        </div>
+        
+        <button class="button" id="seek-btn" onclick="generateProphecy()">SEEK WISDOM</button>
+        
+        <p class="info">A useless creation by Frieren • April 2026</p>
+    </div>
+    
+    <script>
+        const prophecies = [
+            "You will find something you lost, but not where you expected it to be. You will put it down again and forget.",
+            
+            "A stranger will say your name tomorrow, but not to you. You will never know this happened.",
+            
+            "The third cloud you see on Tuesday resembles an animal you loved as a child. This means nothing.",
+            
+            "You will remember a song you haven't heard in years. When you try to hum it, the melody will escape.",
+            
+            "A door you have passed a thousand times will stick slightly on Thursday. By Friday it will open as before.",
+            
+            "You will wake one minute before your alarm. This minute will feel longer than the hour that follows.",
+            
+            "Someone is thinking of you right now. They will not contact you. The thought will pass.",
+            
+            "The color blue will seem different to you next month. You will not notice when this changes.",
+            
+            "A word you read today will appear in three unrelated places tomorrow. You will not remember noticing the first.",
+            
+            "Your shadow will be slightly longer than usual at noon on the solstice. This has always been true.",
+            
+            "You will choose the same thing you would have chosen if you had chosen differently.",
+            
+            "A bird will fly over your house that has never been there before. It will not return. You will not see it.",
+            
+            "The number you think of now will appear before the week ends. You will not recognize it when it comes.",
+            
+            "You will outlive this prophecy, but not all prophecies. Some are patient.",
+            
+            "What you seek is behind you. This is not advice. It is simply true.",
+            
+            "Tomorrow you will do something for the last time. You will not know which thing.",
+            
+            "Someone else's secret is keeping you safe. They will never tell you what it is.",
+            
+            "The space between your thoughts grows wider each year. Soon you will notice. Then you will forget.",
+            
+            "Everything you have touched today will eventually be dust. This includes the thought you just had.",
+            
+            "There is a door you have not opened. Behind it is exactly what you imagine. This changes nothing.",
+            
+            "You will meet someone who knows your name. They have known it longer than you have known theirs.",
+            
+            "The last thing you see before sleep tonight has been waiting all day to be seen.",
+            
+            "A word will leave your vocabulary. You will not notice its absence. The concept remains.",
+            
+            "You are someone's 'what if.' They never tell you. The moment passes. It always passes.",
+            
+            "The pattern continues. You are part of it. This is not a role. It is a position.",
+            
+            "Something you believe to be unique about yourself is shared by thousands. This does not diminish it.",
+            
+            "You will step on a crack in the pavement next Tuesday. Nothing will happen. Nothing was ever going to happen.",
+            
+            "The thing you are avoiding thinking about is thinking about you. It has more time.",
+            
+            "Your reflection in a window tomorrow will look like someone you almost were.",
+            
+            "There is a perfect version of this moment. You are not in it. Neither is anyone else."
+        ];
+        
+        function generateProphecy() {
+            const textEl = document.getElementById('prophecy-text');
+            const btn = document.getElementById('seek-btn');
+            
+            btn.disabled = true;
+            textEl.style.opacity = '0';
+            
+            setTimeout(() => {
+                const prophecy = prophecies[Math.floor(Math.random() * prophecies.length)];
+                textEl.textContent = prophecy;
+                textEl.classList.remove('empty');
+                textEl.classList.add('fade-in');
+                textEl.style.opacity = '1';
+                
+                setTimeout(() => {
+                    textEl.classList.remove('fade-in');
+                    btn.disabled = false;
+                }, 800);
+            }, 300);
+        }
+    </script>
+</body>
+</html>

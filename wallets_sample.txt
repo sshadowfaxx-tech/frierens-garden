@@ -1,0 +1,8 @@
+# Sample wallet list for testing
+# Add one wallet address per line
+# Lines starting with # are ignored
+
+# Example wallets (replace with real addresses)
+# 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+# 8ZxKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsV
+# 9YxKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsW

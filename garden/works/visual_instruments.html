@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Instruments — Frieren's Garden</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 { font-size: 1.2rem; font-weight: 500; color: #a371f7; }
+        .header-controls { display: flex; gap: 1rem; align-items: center; }
+        #startBtn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        #startBtn:hover { background: #2ea043; }
+        select {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 0.4rem;
+            border-radius: 4px;
+        }
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        .visualizer-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+        }
+        #visualizer {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .mixer-panel {
+            width: 300px;
+            background: #161b22;
+            border-left: 1px solid #30363d;
+            padding: 1rem;
+        }
+        .mixer-panel h2 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #8b949e;
+            margin-bottom: 1rem;
+        }
+        .channel {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+        }
+        .channel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .channel-toggle {
+            width: 36px;
+            height: 20px;
+            background: #30363d;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .channel-toggle.active { background: #238636; }
+        .channel-toggle::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+        .channel-toggle.active::after { transform: translateX(16px); }
+        .channel-name { flex: 1; font-size: 0.9rem; }
+        .channel-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+        .orbital .channel-icon { background: #a371f7; }
+        .geometric .channel-icon { background: #3fb950; }
+        .fluid .channel-icon { background: #58a6ff; }
+        .stellar .channel-icon { background: #f0883e; }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .slider-label {
+            font-size: 0.75rem;
+            color: #8b949e;
+            width: 60px;
+        }
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 4px;
+            background: #30363d;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #a371f7;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #8b949e;
+        }
+        .status-bar {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+        .back-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+        .back-link a {
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .back-link a:hover { color: #a371f7; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎛️ Visual Instruments</h1>
+        <div class="header-controls">
+            <button id="startBtn">Start Audio</button>
+        </div>
+    </header>
+    
+    <div class="main-container">
+        <div class="visualizer-container">
+            <div class="back-link"><a href="../creative.html">← back to creative</a></div>
+            <canvas id="visualizer"></canvas>
+            <div class="overlay" id="emptyState">
+                <p>Click "Start Audio" to begin visualization</p>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem;">Requires microphone permission</p>
+            </div>
+            <div class="status-bar" id="statusBar" style="display: none;">
+                FPS: <span id="fps">0</span> | Active: <span id="activeCount">0</span>
+            </div>
+        </div>
+        
+        <div class="mixer-panel">
+            <h2>Mixer</h2>
+            
+            <div class="channel orbital" data-inst="orbital">
+                <div class="channel-header">
+                    <div class="channel-icon">◉</div>
+                    <span class="channel-name">Orbital</span>
+                    <div class="channel-toggle" data-inst="orbital"></div>
+                </div>
+                <div class="slider-container">
+                    <span class="slider-label">Intensity</span>
+                    <input type="range" class="intensity" min="0" max="100" value="70">
+                </div>
+            </div>
+            
+            <div class="channel geometric" data-inst="geometric">
+                <div class="channel-header">
+                    <div class="channel-icon">◆</div>
+                    <span class="channel-name">Geometric</span>
+                    <div class="channel-toggle" data-inst="geometric"></div>
+                </div>
+                <div class="slider-container">
+                    <span class="slider-label">Intensity</span>
+                    <input type="range" class="intensity" min="0" max="100" value="60">
+                </div>
+            </div>
+            
+            <div class="channel fluid" data-inst="fluid">
+                <div class="channel-header">
+                    <div class="channel-icon">≋</div>
+                    <span class="channel-name">Fluid</span>
+                    <div class="channel-toggle" data-inst="fluid"></div>
+                </div>
+                <div class="slider-container">
+                    <span class="slider-label">Intensity</span>
+                    <input type="range" class="intensity" min="0" max="100" value="50">
+                </div>
+            </div>
+            
+            <div class="channel stellar" data-inst="stellar">
+                <div class="channel-header">
+                    <div class="channel-icon">✦</div>
+                    <span class="channel-name">Stellar</span>
+                    <div class="channel-toggle" data-inst="stellar"></div>
+                </div>
+                <div class="slider-container">
+                    <span class="slider-label">Intensity</span>
+                    <input type="range" class="intensity" min="0" max="100" value="80">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        let audioContext, analyser, source, animationId;
+        let isPlaying = false;
+        const instruments = {
+            orbital: { enabled: false, intensity: 70, rotation: 0 },
+            geometric: { enabled: false, intensity: 60, rotation: 0 },
+            fluid: { enabled: false, intensity: 50, history: [] },
+            stellar: { enabled: false, intensity: 80, stars: [] }
+        };
+        
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // Initialize stellar stars
+        for (let i = 0; i < 200; i++) {
+            instruments.stellar.stars.push({
+                x: (Math.random() - 0.5) * 2000,
+                y: (Math.random() - 0.5) * 2000,
+                z: Math.random() * 1000,
+                size: Math.random() * 2 + 0.5
+            });
+        }
+        
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                
+                isPlaying = true;
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('statusBar').style.display = 'block';
+                document.getElementById('startBtn').textContent = 'Audio Active';
+                render();
+            } catch (err) {
+                alert('Could not access microphone: ' + err.message);
+            }
+        }
+        
+        function getAudioData() {
+            if (!analyser) return { bass: 0, mid: 0, treble: 0 };
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(data);
+            
+            const bassEnd = Math.floor(data.length * 0.1);
+            const midEnd = Math.floor(data.length * 0.5);
+            
+            let bass = 0, mid = 0, treble = 0;
+            for (let i = 0; i < bassEnd; i++) bass += data[i];
+            for (let i = bassEnd; i < midEnd; i++) mid += data[i];
+            for (let i = midEnd; i < data.length; i++) treble += data[i];
+            
+            return {
+                bass: bass / bassEnd / 255,
+                mid: mid / (midEnd - bassEnd) / 255,
+                treble: treble / (data.length - midEnd) / 255,
+                data: data
+            };
+        }
+        
+        function drawOrbital(ctx, width, height, audio) {
+            const cx = width / 2, cy = height / 2;
+            const { bass, mid } = audio;
+            instruments.orbital.rotation += 0.01 + bass * 0.05;
+            
+            for (let i = 0; i < 6; i++) {
+                const r = 40 + i * 30 + bass * 30;
+                ctx.strokeStyle = `hsla(${270 + i * 15}, 70%, 50%, ${0.3 + mid * 0.3})`;
+                ctx.lineWidth = 2 + bass * 3;
+                ctx.beginPath();
+                for (let a = 0; a < Math.PI * 2; a += 0.5) {
+                    const angle = a + instruments.orbital.rotation * (1 + i * 0.2);
+                    const x = cx + Math.cos(angle) * r;
+                    const y = cy + Math.sin(angle) * r;
+                    if (a === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+            
+            // Center pulse
+            const pulse = 20 + bass * 40;
+            ctx.fillStyle = `hsla(270, 80%, 60%, ${0.5 + bass * 0.5})`;
+            ctx.beginPath();
+            ctx.arc(cx, cy, pulse, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function drawGeometric(ctx, width, height, audio) {
+            const cx = width / 2, cy = height / 2;
+            const { bass, mid, treble } = audio;
+            instruments.geometric.rotation += 0.02 + bass * 0.03;
+            
+            const sides = 6;
+            const r = 100 + mid * 50;
+            
+            ctx.strokeStyle = `hsla(${150}, 70%, 60%, ${0.5 + treble * 0.3})`;
+            ctx.lineWidth = 2 + bass * 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * Math.PI * 2 + instruments.geometric.rotation;
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+        
+        function drawFluid(ctx, width, height, audio) {
+            const { bass, data } = audio;
+            
+            // Store history
+            instruments.fluid.history.push([...data]);
+            if (instruments.fluid.history.length > 50) instruments.fluid.history.shift();
+            
+            // Trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw flowing lines
+            for (let i = 0; i < 8; i++) {
+                const y = height / 2 + (i - 4) * 30;
+                const hue = 200 + i * 10;
+                ctx.strokeStyle = `hsla(${hue}, 80%, 60%, 0.6)`;
+                ctx.lineWidth = 2 + bass;
+                ctx.beginPath();
+                
+                for (let t = 0; t < instruments.fluid.history.length; t++) {
+                    const x = (t / instruments.fluid.history.length) * width;
+                    const snapshot = instruments.fluid.history[t];
+                    const idx = Math.floor((i / 8) * snapshot.length * 0.5);
+                    const val = snapshot[idx] / 255;
+                    const py = y + val * 50 - 25;
+                    if (t === 0) ctx.moveTo(x, py);
+                    else ctx.lineTo(x, py);
+                }
+                ctx.stroke();
+            }
+        }
+        
+        function drawStellar(ctx, width, height, audio) {
+            const cx = width / 2, cy = height / 2;
+            const { bass, transient } = audio;
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, width, height);
+            
+            instruments.stellar.stars.forEach(star => {
+                star.z -= 2 + bass * 5;
+                if (star.z <= 0) {
+                    star.z = 1000;
+                    star.x = (Math.random() - 0.5) * 2000;
+                    star.y = (Math.random() - 0.5) * 2000;
+                }
+                
+                const scale = 500 / star.z;
+                const x = cx + star.x * scale;
+                const y = cy + star.y * scale;
+                
+                if (x < 0 || x > width || y < 0 || y > height) return;
+                
+                const alpha = (1 - star.z / 1000) * (0.5 + bass * 0.5);
+                ctx.fillStyle = `hsla(${200 + bass * 60}, 80%, 80%, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, Math.max(0.5, star.size * scale), 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let lastFpsTime = performance.now();
+        
+        function render() {
+            if (!isPlaying) return;
+            
+            const now = performance.now();
+            const audio = getAudioData();
+            
+            // FPS counter
+            frameCount++;
+            if (now - lastFpsTime >= 1000) {
+                document.getElementById('fps').textContent = frameCount;
+                frameCount = 0;
+                lastFpsTime = now;
+            }
+            
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw active instruments
+            let active = 0;
+            if (instruments.orbital.enabled) {
+                drawOrbital(ctx, canvas.width, canvas.height, audio);
+                active++;
+            }
+            if (instruments.geometric.enabled) {
+                drawGeometric(ctx, canvas.width, canvas.height, audio);
+                active++;
+            }
+            if (instruments.fluid.enabled) {
+                drawFluid(ctx, canvas.width, canvas.height, audio);
+                active++;
+            }
+            if (instruments.stellar.enabled) {
+                drawStellar(ctx, canvas.width, canvas.height, audio);
+                active++;
+            }
+            
+            document.getElementById('activeCount').textContent = active;
+            animationId = requestAnimationFrame(render);
+        }
+        
+        // Controls
+        document.getElementById('startBtn').addEventListener('click', initAudio);
+        
+        document.querySelectorAll('.channel-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const inst = toggle.dataset.inst;
+                instruments[inst].enabled = !instruments[inst].enabled;
+                toggle.classList.toggle('active', instruments[inst].enabled);
+            });
+        });
+        
+        document.querySelectorAll('.intensity').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const inst = e.target.closest('.channel').dataset.inst;
+                instruments[inst].intensity = parseInt(e.target.value);
+            });
+        });
+    </script>
+</body>
+</html>

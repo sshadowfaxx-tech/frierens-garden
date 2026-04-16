@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synth Lab — Generative Sound Synthesis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #0a0a0f;
+            --bg-panel: #111118;
+            --bg-input: #1a1a24;
+            --border: #2a2a3a;
+            --text: #e0e0e8;
+            --text-muted: #808090;
+            --accent: #ff6b6b;
+            --accent-2: #4ecdc4;
+            --accent-3: #ffe66d;
+            --accent-4: #a8e6cf;
+            --warning: #ffa726;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: var(--accent-2);
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .start-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        
+        .start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .start-btn {
+            padding: 1.5rem 3rem;
+            font-size: 1rem;
+            background: transparent;
+            border: 2px solid var(--accent-2);
+            color: var(--accent-2);
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+        }
+        
+        .start-btn:hover {
+            background: var(--accent-2);
+            color: var(--bg);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+        
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .panel-title {
+            font-size: 0.9rem;
+            color: var(--accent-3);
+            letter-spacing: 0.05em;
+        }
+        
+        .panel-status {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .panel-status.active {
+            color: var(--accent-4);
+        }
+        
+        .control-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .control-value {
+            color: var(--accent);
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        button:hover {
+            border-color: var(--accent-2);
+            color: var(--accent-2);
+        }
+        
+        button.active {
+            background: var(--accent-2);
+            border-color: var(--accent-2);
+            color: var(--bg);
+        }
+        
+        button.play {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+        
+        button.play:hover {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+        
+        .visualizer {
+            width: 100%;
+            height: 100px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+        
+        .keyboard {
+            display: flex;
+            gap: 2px;
+            margin-top: 1rem;
+        }
+        
+        .key {
+            flex: 1;
+            height: 80px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 0.5rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            transition: all 0.1s;
+        }
+        
+        .key:hover, .key.active {
+            background: var(--accent-2);
+            border-color: var(--accent-2);
+            color: var(--bg);
+        }
+        
+        .key.black {
+            background: var(--bg);
+            height: 50px;
+            margin-top: 0;
+            margin-left: -1rem;
+            margin-right: -1rem;
+            z-index: 1;
+        }
+        
+        .info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-left: 3px solid var(--accent-2);
+        }
+        
+        .grain-display {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            gap: 2px;
+            margin-top: 1rem;
+            height: 60px;
+        }
+        
+        .grain {
+            background: var(--bg-input);
+            border-radius: 2px;
+            transition: all 0.05s;
+        }
+        
+        .grain.active {
+            background: var(--accent);
+        }
+        
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            font-size: 0.7rem;
+        }
+        
+        .stat {
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+        }
+        
+        .stat-value {
+            color: var(--accent-2);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="start-overlay" id="startOverlay">
+        <button class="start-btn" id="startBtn">▶ INITIALIZE AUDIO ENGINE</button>
+    </div>
+
+    <header>
+        <h1>◈ SYNTH_LAB</h1>
+        <div class="subtitle">Generative Sound Synthesis Laboratory | FM • Granular • Physical Modeling • Algorithmic Composition</div>
+    </header>
+
+    <div class="container">
+        <div class="grid">
+            <!-- FM Synthesizer -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">FM SYNTHESIZER</span>
+                    <span class="panel-status" id="fmStatus">Standby</span>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Carrier Frequency</span>
+                        <span class="control-value" id="carrierFreqVal">440 Hz</span>
+                    </div>
+                    <input type="range" id="carrierFreq" min="55" max="1760" value="440" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Modulator Ratio</span>
+                        <span class="control-value" id="modRatioVal">1:1</span>
+                    </div>
+                    <input type="range" id="modRatio" min="0.5" max="10" value="1" step="0.5">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Modulation Index</span>
+                        <span class="control-value" id="modIndexVal">500</span>
+                    </div>
+                    <input type="range" id="modIndex" min="0" max="5000" value="500" step="50">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Waveform</span>
+                    </div>
+                    <select id="waveform">
+                        <option value="sine">Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth">Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="fmTrigger" class="play">▶ Trigger</button>
+                    <button id="fmPresets">Presets ▼</button>
+                </div>
+                
+                <div class="info">
+                    <strong>Theory:</strong> FM synthesis modulates the carrier frequency with the modulator. 
+                    The ratio determines harmonic spacing; the index controls brightness. 
+                    Classic sounds: Bell (1:1, low index), Brass (1:2, high index), Metallic (inharmonic ratios).
+                </div>
+                
+                <canvas class="visualizer" id="fmViz"></canvas>
+                
+                <div class="keyboard" id="fmKeyboard">
+                    <div class="key" data-note="261.63">C</div>
+                    <div class="key black" data-note="277.18">C#</div>
+                    <div class="key" data-note="293.66">D</div>
+                    <div class="key black" data-note="311.13">D#</div>
+                    <div class="key" data-note="329.63">E</div>
+                    <div class="key" data-note="349.23">F</div>
+                    <div class="key black" data-note="369.99">F#</div>
+                    <div class="key" data-note="392.00">G</div>
+                    <div class="key black" data-note="415.30">G#</div>
+                    <div class="key" data-note="440.00">A</div>
+                    <div class="key black" data-note="466.16">A#</div>
+                    <div class="key" data-note="493.88">B</div>
+                </div>
+            </div>
+
+            <!-- Granular Synthesis -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">GRANULAR SYNTHESIS</span>
+                    <span class="panel-status" id="granularStatus">Standby</span>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Grain Size</span>
+                        <span class="control-value" id="grainSizeVal">50 ms</span>
+                    </div>
+                    <input type="range" id="grainSize" min="5" max="200" value="50" step="5">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Density (grains/sec)</span>
+                        <span class="control-value" id="densityVal">20</span>
+                    </div>
+                    <input type="range" id="density" min="1" max="100" value="20" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Pitch Shift (semitones)</span>
+                        <span class="control-value" id="pitchShiftVal">0</span>
+                    </div>
+                    <input type="range" id="pitchShift" min="-12" max="12" value="0" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Overlap</span>
+                        <span class="control-value" id="overlapVal">50%</span>
+                    </div>
+                    <input type="range" id="overlap" min="0" max="90" value="50" step="10">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Source</span>
+                    </div>
+                    <select id="grainSource">
+                        <option value="sine">Pure Sine</option>
+                        <option value="saw">Sawtooth</option>
+                        <option value="noise">White Noise</option>
+                        <option value="pulse">Pulse Train</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="grainStart" class="play">▶ Start Cloud</button>
+                    <button id="grainStop">■ Stop</button>
+                    <button id="grainGlitch">Glitch Mode</button>
+                    <button id="grainDrone">Drone Mode</button>
+                </div>
+                
+                <div class="info">
+                    <strong>Concept:</strong> Sound is broken into micro-grains (1-100ms) and recombined. 
+                    Pitch shifting without time change: alter playbackRate. 
+                    Time-stretching without pitch change: overlap grains with staggered positions. 
+                    Alva Noto aesthetic: tiny grains + sparse density = glitch.
+                </div>
+                
+                <div class="grain-display" id="grainDisplay"></div>
+                
+                <div class="stats">
+                    <div class="stat">Grains: <span class="stat-value" id="grainCount">0</span></div>
+                    <div class="stat">CPU: <span class="stat-value" id="cpuLoad">0%</span></div>
+                </div>
+                
+                <canvas class="visualizer" id="grainViz"></canvas>
+            </div>
+
+            <!-- Karplus-Strong Physical Modeling -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">PHYSICAL MODELING (Karplus-Strong)</span>
+                    <span class="panel-status" id="ksStatus">Standby</span>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Decay Time</span>
+                        <span class="control-value" id="decayVal">2.0 s</span>
+                    </div>
+                    <input type="range" id="decay" min="0.1" max="5" value="2" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Damping (Filter Cutoff)</span>
+                        <span class="control-value" id="dampingVal">2000 Hz</span>
+                    </div>
+                    <input type="range" id="damping" min="200" max="8000" value="2000" step="100">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>String Tension</span>
+                        <span class="control-value" id="tensionVal">1.0</span>
+                    </div>
+                    <input type="range" id="tension" min="0.5" max="2" value="1" step="0.1">
+                </div>
+                
+                <div class="btn-group">
+                    <button id="pluckC" class="play">C2 Pluck</button>
+                    <button id="pluckE" class="play">E2 Pluck</button>
+                    <button id="pluckG" class="play">G2 Pluck</button>
+                    <button id="pluckB">B2 Pluck</button>
+                </div>
+                
+                <div class="info">
+                    <strong>Algorithm:</strong> Simulates a plucked string using a delay line with averaging filter. 
+                    The delay length determines pitch; the filter simulates frequency-dependent damping. 
+                    Excitation: short noise burst. 
+                    Extensions: Commuted synthesis, modal synthesis for percussion.
+                </div>
+                
+                <canvas class="visualizer" id="ksViz"></canvas>
+            </div>
+
+            <!-- Generative Composition System -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">GENERATIVE COMPOSITION (Eno-Style)</span>
+                    <span class="panel-status" id="genStatus">Standby</span>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Scale</span>
+                    </div>
+                    <select id="genScale">
+                        <option value="major">Major (Ionian)</option>
+                        <option value="minor">Natural Minor (Aeolian)</option>
+                        <option value="dorian">Dorian</option>
+                        <option value="pentatonic">Pentatonic</option>
+                        <option value="whole">Whole Tone</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Density (probability)</span>
+                        <span class="control-value" id="genDensityVal">0.3</span>
+                    </div>
+                    <input type="range" id="genDensity" min="0.05" max="0.9" value="0.3" step="0.05">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Loop Duration (layer 1)</span>
+                        <span class="control-value" id="loop1Val">23.3s</span>
+                    </div>
+                    <input type="range" id="loop1" min="5" max="60" value="23.3" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Loop Duration (layer 2)</span>
+                        <span class="control-value" id="loop2Val">17.7s</span>
+                    </div>
+                    <input type="range" id="loop2" min="5" max="60" value="17.7" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Markov Order</span>
+                        <span class="control-value" id="markovOrderVal">2</span>
+                    </div>
+                    <input type="range" id="markovOrder" min="1" max="4" value="2" step="1">
+                </div>
+                
+                <div class="btn-group">
+                    <button id="genStart" class="play">▶ Start Generating</button>
+                    <button id="genStop">■ Stop</button>
+                    <button id="genMutate">🎲 Mutate</button>
+                </div>
+                
+                <div class="info">
+                    <strong>Principles:</strong> Multiple independent layers with prime loop durations (23.3s × 17.7s ≈ 6.8min cycle). 
+                    Each layer follows simple probabilistic rules. 
+                    Markov chains for melodic continuity. 
+                    "Honor thy error as a hidden intention" — unexpected combinations become features.
+                </div>
+                
+                <div class="stats">
+                    <div class="stat">Layer 1: <span class="stat-value" id="layer1Stat">OFF</span></div>
+                    <div class="stat">Layer 2: <span class="stat-value" id="layer2Stat">OFF</span></div>
+                    <div class="stat">Phrase: <span class="stat-value" id="phraseStat">--</span></div>
+                </div>
+                
+                <canvas class="visualizer" id="genViz"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // AUDIO ENGINE CORE
+        // ============================================
+        
+        let audioCtx;
+        let masterGain;
+        let analyser;
+        
+        // Initialize audio context
+        document.getElementById('startBtn').addEventListener('click', async () => {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Master chain
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.5;
+            
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048;
+            
+            masterGain.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            
+            document.getElementById('startOverlay').classList.add('hidden');
+            
+            // Start visualizers
+            startVisualizers();
+            
+            // Initialize grain display
+            initGrainDisplay();
+        });
+        
+        // ============================================
+        // FM SYNTHESIZER
+        // ============================================
+        
+        class FMSynth {
+            constructor() {
+                this.carrier = null;
+                this.modulator = null;
+                this.modGain = null;
+                this.env = null;
+            }
+            
+            trigger(frequency, duration = 1.0) {
+                const carrierFreq = parseFloat(document.getElementById('carrierFreq').value);
+                const modRatio = parseFloat(document.getElementById('modRatio').value);
+                const modIndex = parseFloat(document.getElementById('modIndex').value);
+                const waveform = document.getElementById('waveform').value;
+                
+                // Create nodes
+                this.carrier = audioCtx.createOscillator();
+                this.modulator = audioCtx.createOscillator();
+                this.modGain = audioCtx.createGain();
+                this.env = audioCtx.createGain();
+                
+                // Set parameters
+                this.carrier.type = waveform;
+                this.carrier.frequency.value = frequency || carrierFreq;
+                
+                this.modulator.type = 'sine';
+                this.modulator.frequency.value = (frequency || carrierFreq) * modRatio;
+                
+                this.modGain.gain.value = modIndex;
+                
+                // FM routing: modulator -> modGain -> carrier.frequency
+                this.modulator.connect(this.modGain);
+                this.modGain.connect(this.carrier.frequency);
+                this.carrier.connect(this.env);
+                this.env.connect(masterGain);
+                
+                // Envelope
+                const now = audioCtx.currentTime;
+                this.env.gain.setValueAtTime(0, now);
+                this.env.gain.linearRampToValueAtTime(0.5, now + 0.01);
+                this.env.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                
+                // Start
+                this.carrier.start(now);
+                this.modulator.start(now);
+                this.carrier.stop(now + duration);
+                this.modulator.stop(now + duration);
+                
+                // Cleanup
+                setTimeout(() => {
+                    this.carrier = null;
+                    this.modulator = null;
+                }, duration * 1000 + 100);
+            }
+        }
+        
+        const fmSynth = new FMSynth();
+        
+        // FM Controls
+        document.getElementById('carrierFreq').addEventListener('input', (e) => {
+            document.getElementById('carrierFreqVal').textContent = e.target.value + ' Hz';
+        });
+        
+        document.getElementById('modRatio').addEventListener('input', (e) => {
+            document.getElementById('modRatioVal').textContent = '1:' + e.target.value;
+        });
+        
+        document.getElementById('modIndex').addEventListener('input', (e) => {
+            document.getElementById('modIndexVal').textContent = e.target.value;
+        });
+        
+        document.getElementById('fmTrigger').addEventListener('click', () => {
+            fmSynth.trigger();
+            document.getElementById('fmStatus').textContent = 'Playing';
+            document.getElementById('fmStatus').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('fmStatus').textContent = 'Standby';
+                document.getElementById('fmStatus').classList.remove('active');
+            }, 1000);
+        });
+        
+        // FM Keyboard
+        document.querySelectorAll('#fmKeyboard .key').forEach(key => {
+            key.addEventListener('mousedown', () => {
+                key.classList.add('active');
+                fmSynth.trigger(parseFloat(key.dataset.note), 0.8);
+            });
+            key.addEventListener('mouseup', () => key.classList.remove('active'));
+            key.addEventListener('mouseleave', () => key.classList.remove('active'));
+        });
+        
+        // FM Presets
+        const fmPresets = {
+            bell: { ratio: 1, index: 200, waveform: 'sine' },
+            brass: { ratio: 2, index: 2000, waveform: 'sawtooth' },
+            electric: { ratio: 1, index: 500, waveform: 'sine' },
+            metallic: { ratio: 2.71, index: 1000, waveform: 'square' },
+            bass: { ratio: 0.5, index: 300, waveform: 'sawtooth' }
+        };
+        
+        document.getElementById('fmPresets').addEventListener('click', () => {
+            const presets = Object.keys(fmPresets);
+            const random = presets[Math.floor(Math.random() * presets.length)];
+            const preset = fmPresets[random];
+            
+            document.getElementById('modRatio').value = preset.ratio;
+            document.getElementById('modIndex').value = preset.index;
+            document.getElementById('waveform').value = preset.waveform;
+            
+            document.getElementById('modRatioVal').textContent = '1:' + preset.ratio;
+            document.getElementById('modIndexVal').textContent = preset.index;
+            
+            fmSynth.trigger();
+        });
+        
+        // ============================================
+        // GRANULAR SYNTHESIS
+        // ============================================
+        
+        class GranularEngine {
+            constructor() {
+                this.running = false;
+                this.grainCount = 0;
+                this.nextGrainTime = 0;
+                this.grainBuffer = null;
+            }
+            
+            async init() {
+                // Create a buffer with various waveforms for grains
+                const sampleRate = audioCtx.sampleRate;
+                const duration = 2.0;
+                this.grainBuffer = audioCtx.createBuffer(1, sampleRate * duration, sampleRate);
+                const data = this.grainBuffer.getChannelData(0);
+                
+                for (let i = 0; i < data.length; i++) {
+                    const t = i / sampleRate;
+                    // Mix of sine, harmonics, and noise for interesting grains
+                    data[i] = Math.sin(2 * Math.PI * 220 * t) * 0.5 +
+                              Math.sin(2 * Math.PI * 440 * t) * 0.25 +
+                              Math.sin(2 * Math.PI * 660 * t) * 0.125 +
+                              (Math.random() - 0.5) * 0.1;
+                }
+            }
+            
+            start() {
+                if (this.running) return;
+                this.running = true;
+                this.nextGrainTime = audioCtx.currentTime;
+                this.scheduleGrains();
+                document.getElementById('granularStatus').textContent = 'Active';
+                document.getElementById('granularStatus').classList.add('active');
+            }
+            
+            stop() {
+                this.running = false;
+                document.getElementById('granularStatus').textContent = 'Standby';
+                document.getElementById('granularStatus').classList.remove('active');
+            }
+            
+            scheduleGrains() {
+                if (!this.running) return;
+                
+                const now = audioCtx.currentTime;
+                const density = parseInt(document.getElementById('density').value);
+                const grainSize = parseInt(document.getElementById('grainSize').value) / 1000;
+                const pitchShift = parseInt(document.getElementById('pitchShift').value);
+                const overlap = parseInt(document.getElementById('overlap').value) / 100;
+                
+                // Schedule ahead by 100ms
+                while (this.nextGrainTime < now + 0.1) {
+                    this.playGrain(this.nextGrainTime, grainSize, pitchShift);
+                    
+                    // Advance time based on density and overlap
+                    const interval = (1 / density) * (1 - overlap * 0.5);
+                    this.nextGrainTime += interval + (Math.random() * 0.01);
+                }
+                
+                requestAnimationFrame(() => this.scheduleGrains());
+            }
+            
+            playGrain(time, duration, pitchShift) {
+                const source = audioCtx.createBufferSource();
+                const gain = audioCtx.createGain();
+                
+                // Use generated buffer
+                source.buffer = this.grainBuffer;
+                
+                // Pitch shift
+                const pitchRatio = Math.pow(2, pitchShift / 12);
+                source.playbackRate.value = pitchRatio;
+                
+                // Random position in buffer
+                const position = Math.random() * (this.grainBuffer.duration - duration);
+                
+                // Gaussian envelope
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(0.3, time + duration * 0.1);
+                gain.gain.linearRampToValueAtTime(0, time + duration);
+                
+                source.connect(gain);
+                gain.connect(masterGain);
+                
+                source.start(time, position, duration);
+                
+                this.grainCount++;
+                document.getElementById('grainCount').textContent = this.grainCount;
+                
+                // Visual feedback
+                triggerGrainVisual();
+            }
+        }
+        
+        const granular = new GranularEngine();
+        
+        // Granular Controls
+        document.getElementById('grainSize').addEventListener('input', (e) => {
+            document.getElementById('grainSizeVal').textContent = e.target.value + ' ms';
+        });
+        
+        document.getElementById('density').addEventListener('input', (e) => {
+            document.getElementById('densityVal').textContent = e.target.value;
+        });
+        
+        document.getElementById('pitchShift').addEventListener('input', (e) => {
+            document.getElementById('pitchShiftVal').textContent = e.target.value;
+        });
+        
+        document.getElementById('overlap').addEventListener('input', (e) => {
+            document.getElementById('overlapVal').textContent = e.target.value + '%';
+        });
+        
+        document.getElementById('grainStart').addEventListener('click', async () => {
+            if (!granular.grainBuffer) await granular.init();
+            granular.start();
+        });
+        
+        document.getElementById('grainStop').addEventListener('click', () => {
+            granular.stop();
+        });
+        
+        document.getElementById('grainGlitch').addEventListener('click', () => {
+            document.getElementById('grainSize').value = 10;
+            document.getElementById('density').value = 15;
+            document.getElementById('pitchShift').value = Math.floor(Math.random() * 24) - 12;
+            document.getElementById('overlap').value = 10;
+            
+            document.getElementById('grainSizeVal').textContent = '10 ms';
+            document.getElementById('densityVal').textContent = '15';
+            document.getElementById('pitchShiftVal').textContent = document.getElementById('pitchShift').value;
+            document.getElementById('overlapVal').textContent = '10%';
+            
+            if (!granular.grainBuffer) granular.init();
+            granular.start();
+        });
+        
+        document.getElementById('grainDrone').addEventListener('click', () => {
+            document.getElementById('grainSize').value = 150;
+            document.getElementById('density').value = 40;
+            document.getElementById('pitchShift').value = 0;
+            document.getElementById('overlap').value = 80;
+            
+            document.getElementById('grainSizeVal').textContent = '150 ms';
+            document.getElementById('densityVal').textContent = '40';
+            document.getElementById('pitchShiftVal').textContent = '0';
+            document.getElementById('overlapVal').textContent = '80%';
+            
+            if (!granular.grainBuffer) granular.init();
+            granular.start();
+        });
+        
+        // Grain visual display
+        function initGrainDisplay() {
+            const display = document.getElementById('grainDisplay');
+            display.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const grain = document.createElement('div');
+                grain.className = 'grain';
+                display.appendChild(grain);
+            }
+        }
+        
+        function triggerGrainVisual() {
+            const grains = document.querySelectorAll('.grain');
+            const random = Math.floor(Math.random() * grains.length);
+            grains[random].classList.add('active');
+            setTimeout(() => grains[random].classList.remove('active'), 100);
+        }
+        
+        // ============================================
+        // KARPLUS-STRONG PHYSICAL MODELING
+        // ============================================
+        
+        function pluckString(frequency, duration = 2.0) {
+            const sampleRate = audioCtx.sampleRate;
+            const delaySamples = Math.round(sampleRate / frequency);
+            const decay = parseFloat(document.getElementById('decay').value);
+            const damping = parseFloat(document.getElementById('damping').value);
+            const tension = parseFloat(document.getElementById('tension').value);
+            
+            // Create buffer for the initial excitation (noise burst)
+            const excitation = audioCtx.createBuffer(1, delaySamples, sampleRate);
+            const excData = excitation.getChannelData(0);
+            
+            for (let i = 0; i < delaySamples; i++) {
+                // Noise with decay envelope
+                excData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / delaySamples, 0.5);
+            }
+            
+            // Create noise source
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = excitation;
+            
+            // Delay line using DelayNode
+            const delay = audioCtx.createDelay(delaySamples / sampleRate);
+            delay.delayTime.value = delaySamples / sampleRate;
+            
+            // Lowpass filter (averaging simulation)
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = damping;
+            filter.Q.value = 0.5;
+            
+            // Feedback loop
+            const feedback = audioCtx.createGain();
+            feedback.gain.value = 0.995 * tension;
+            
+            // Output envelope
+            const env = audioCtx.createGain();
+            env.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            env.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + decay);
+            
+            // Routing: noise -> delay -> filter -> feedback -> delay
+            //                    └─────────────────────────────┘
+            //                    ↓
+            //                  output
+            
+            noise.connect(delay);
+            delay.connect(filter);
+            filter.connect(feedback);
+            feedback.connect(delay);
+            delay.connect(env);
+            env.connect(masterGain);
+            
+            noise.start();
+            
+            // Stop after decay
+            setTimeout(() => {
+                noise.stop();
+                noise.disconnect();
+                delay.disconnect();
+                filter.disconnect();
+            }, decay * 1000);
+            
+            document.getElementById('ksStatus').textContent = 'Playing';
+            document.getElementById('ksStatus').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('ksStatus').textContent = 'Standby';
+                document.getElementById('ksStatus').classList.remove('active');
+            }, 500);
+        }
+        
+        // KS Controls
+        document.getElementById('decay').addEventListener('input', (e) => {
+            document.getElementById('decayVal').textContent = e.target.value + ' s';
+        });
+        
+        document.getElementById('damping').addEventListener('input', (e) => {
+            document.getElementById('dampingVal').textContent = e.target.value + ' Hz';
+        });
+        
+        document.getElementById('tension').addEventListener('input', (e) => {
+            document.getElementById('tensionVal').textContent = e.target.value;
+        });
+        
+        document.getElementById('pluckC').addEventListener('click', () => pluckString(65.41));
+        document.getElementById('pluckE').addEventListener('click', () => pluckString(82.41));
+        document.getElementById('pluckG').addEventListener('click', () => pluckString(98.00));
+        document.getElementById('pluckB').addEventListener('click', () => pluckString(123.47));
+        
+        // ============================================
+        // GENERATIVE COMPOSITION SYSTEM
+        // ============================================
+        
+        class GenerativeSystem {
+            constructor() {
+                this.running = false;
+                this.layers = [];
+                this.markovChain = new Map();
+            }
+            
+            buildMarkovChain(scale, order) {
+            // Build transitions from scale degrees
+            const notes = scale.map(interval => 60 + interval); // C4 base
+            this.markovChain.clear();
+            
+            for (let i = 0; i <= notes.length - order - 1; i++) {
+                    const state = notes.slice(i, i + order).join(',');
+                    const next = notes[i + order];
+                    
+                    if (!this.markovChain.has(state)) {
+                        this.markovChain.set(state, []);
+                    }
+                    this.markovChain.get(state).push(next);
+                }
+            }
+            
+            predictNext(currentState) {
+                const options = this.markovChain.get(currentState);
+                if (!options || options.length === 0) return null;
+                return options[Math.floor(Math.random() * options.length)];
+            }
+            
+            start() {
+                if (this.running) return;
+                this.running = true;
+                
+                const scaleType = document.getElementById('genScale').value;
+                const scales = {
+                    major: [0, 2, 4, 5, 7, 9, 11],
+                    minor: [0, 2, 3, 5, 7, 8, 10],
+                    dorian: [0, 2, 3, 5, 7, 9, 10],
+                    pentatonic: [0, 2, 4, 7, 9],
+                    whole: [0, 2, 4, 6, 8, 10]
+                };
+                
+                const scale = scales[scaleType];
+                const order = parseInt(document.getElementById('markovOrder').value);
+                this.buildMarkovChain(scale, order);
+                
+                // Layer 1: Slow melodic layer
+                const layer1 = {
+                    notes: scale.map(i => 60 + i),
+                    durations: [2, 4, 6],
+                    loopDuration: parseFloat(document.getElementById('loop1').value),
+                    density: parseFloat(document.getElementById('genDensity').value),
+                    nextEvent: audioCtx.currentTime,
+                    currentNotes: [60, 64],
+                    layer: 1
+                };
+                
+                // Layer 2: Harmonic layer (octave down)
+                const layer2 = {
+                    notes: scale.map(i => 48 + i),
+                    durations: [4, 8],
+                    loopDuration: parseFloat(document.getElementById('loop2').value),
+                    density: 0.6,
+                    nextEvent: audioCtx.currentTime,
+                    currentNotes: [48, 52],
+                    layer: 2
+                };
+                
+                this.layers = [layer1, layer2];
+                
+                this.scheduleLayer(layer1);
+                this.scheduleLayer(layer2);
+                
+                document.getElementById('genStatus').textContent = 'Generating';
+                document.getElementById('genStatus').classList.add('active');
+                document.getElementById('layer1Stat').textContent = 'ON';
+                document.getElementById('layer2Stat').textContent = 'ON';
+            }
+            
+            scheduleLayer(layer) {
+                if (!this.running) return;
+                
+                const now = audioCtx.currentTime;
+                
+                while (layer.nextEvent < now + 0.2) {
+                    if (Math.random() < layer.density) {
+                        // Markov prediction
+                        const state = layer.currentNotes.slice(-2).join(',');
+                        let note = this.predictNext(state);
+                        
+                        if (!note) {
+                            note = layer.notes[Math.floor(Math.random() * layer.notes.length)];
+                        }
+                        
+                        layer.currentNotes.push(note);
+                        if (layer.currentNotes.length > 4) layer.currentNotes.shift();
+                        
+                        const duration = layer.durations[Math.floor(Math.random() * layer.durations.length)];
+                        this.playGenerativeNote(note, layer.nextEvent, duration, layer.layer);
+                        
+                        // Update phrase stat
+                        const phrase = layer.currentNotes.map(n => 
+                            ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][n % 12]
+                        ).join('-');
+                        document.getElementById('phraseStat').textContent = phrase;
+                    }
+                    
+                    layer.nextEvent += layer.loopDuration / 4;
+                }
+                
+                setTimeout(() => this.scheduleLayer(layer), 100);
+            }
+            
+            playGenerativeNote(note, time, duration, layerNum) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+                
+                // Different timbre per layer
+                osc.type = layerNum === 1 ? 'sine' : 'triangle';
+                osc.frequency.value = 440 * Math.pow(2, (note - 69) / 12);
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = layerNum === 1 ? 800 : 2000;
+                filter.Q.value = 2;
+                
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(0.15, time + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(masterGain);
+                
+                osc.start(time);
+                osc.stop(time + duration);
+            }
+            
+            stop() {
+                this.running = false;
+                document.getElementById('genStatus').textContent = 'Standby';
+                document.getElementById('genStatus').classList.remove('active');
+                document.getElementById('layer1Stat').textContent = 'OFF';
+                document.getElementById('layer2Stat').textContent = 'OFF';
+            }
+            
+            mutate() {
+                // Randomize loop durations (prime numbers for long cycles)
+                const primes = [13.3, 17.7, 19.1, 23.3, 29.7, 31.1, 37.3];
+                const l1 = primes[Math.floor(Math.random() * primes.length)];
+                const l2 = primes[Math.floor(Math.random() * primes.length)];
+                
+                document.getElementById('loop1').value = l1;
+                document.getElementById('loop2').value = l2;
+                document.getElementById('loop1Val').textContent = l1.toFixed(1) + 's';
+                document.getElementById('loop2Val').textContent = l2.toFixed(1) + 's';
+                
+                // Restart with new parameters
+                if (this.running) {
+                    this.stop();
+                    setTimeout(() => this.start(), 100);
+                }
+            }
+        }
+        
+        const genSystem = new GenerativeSystem();
+        
+        // Generative Controls
+        document.getElementById('genDensity').addEventListener('input', (e) => {
+            document.getElementById('genDensityVal').textContent = e.target.value;
+        });
+        
+        document.getElementById('loop1').addEventListener('input', (e) => {
+            document.getElementById('loop1Val').textContent = e.target.value + 's';
+        });
+        
+        document.getElementById('loop2').addEventListener('input', (e) => {
+            document.getElementById('loop2Val').textContent = e.target.value + 's';
+        });
+        
+        document.getElementById('markovOrder').addEventListener('input', (e) => {
+            document.getElementById('markovOrderVal').textContent = e.target.value;
+        });
+        
+        document.getElementById('genStart').addEventListener('click', () => genSystem.start());
+        document.getElementById('genStop').addEventListener('click', () => genSystem.stop());
+        document.getElementById('genMutate').addEventListener('click', () => genSystem.mutate());
+        
+        // ============================================
+        // VISUALIZERS
+        // ============================================
+        
+        function startVisualizers() {
+            drawWaveform('fmViz');
+            drawWaveform('grainViz');
+            drawWaveform('ksViz');
+            drawWaveform('genViz');
+        }
+        
+        function drawWaveform(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            
+            function draw() {
+                requestAnimationFrame(draw);
+                
+                analyser.getByteTimeDomainData(dataArray);
+                
+                ctx.fillStyle = '#1a1a24';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#4ecdc4';
+                ctx.beginPath();
+                
+                const sliceWidth = canvas.width / bufferLength;
+                let x = 0;
+                
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * canvas.height / 2;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                    
+                    x += sliceWidth;
+                }
+                
+                ctx.lineTo(canvas.width, canvas.height / 2);
+                ctx.stroke();
+            }
+            
+            draw();
+        }
+        
+        // CPU load estimation
+        setInterval(() => {
+            const grainCount = parseInt(document.getElementById('grainCount').textContent);
+            const load = Math.min(100, Math.round(grainCount / 10));
+            document.getElementById('cpuLoad').textContent = load + '%';
+        }, 1000);
+    </script>
+</body>
+</html>

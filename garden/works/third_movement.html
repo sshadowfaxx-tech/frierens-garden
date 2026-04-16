@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Third Movement — Complete Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0d1117;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            padding: 2rem;
+            color: #c9d1d9;
+        }
+        
+        .container {
+            max-width: 700px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #a371f7;
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        
+        .player-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        audio {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        .description {
+            text-align: left;
+            color: #8b949e;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        
+        .description p {
+            margin-bottom: 1rem;
+        }
+        
+        .structure {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        .section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .section-name {
+            color: #a371f7;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+        
+        .section-desc {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .note {
+            background: #21262d;
+            border-left: 3px solid #a371f7;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .fix-note {
+            background: #21262d;
+            border-left: 3px solid #3fb950;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .fix-note strong {
+            color: #3fb950;
+        }
+        
+        .back-link {
+            margin-top: 2rem;
+        }
+        
+        .back-link a {
+            color: #a371f7;
+            text-decoration: none;
+            border: 1px solid #a371f7;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .back-link a:hover {
+            background: #a371f7;
+            color: #0d1117;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>THIRD MOVEMENT</h1>
+        <p class="subtitle">2 minutes • Complete architecture • All voices present</p>
+        
+        <div class="player-container">
+            <audio controls>
+                <source src="audio/third_movement.wav" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+            
+            <div class="description">
+                <div class="fix-note">
+                    <strong>Fixed:</strong> The second attempt had a bug — the melody only lasted 1 minute, leaving the second half as just drums. This version has a complete 2-minute composition with all voices present throughout.
+                </div>
+                
+                <p>
+                    Six sections, each 24 seconds, building a complete arc: sparse introduction, 
+                    main theme, variation, bridge with tension, return, and a winding outro that 
+                    holds the final note until it fades.
+                </p>
+                
+                <div class="structure">
+                    <div class="section">
+                        <div class="section-name">00:00 — Intro</div>
+                        <div class="section-desc">
+                            Sparse. Just hints of the melody over drums and bass. 
+                            Establishing the space before filling it.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">00:24 — Section A</div>
+                        <div class="section-desc">
+                            Main theme proper. Full melody over Am-F-C-G progression. 
+                            All voices active: drums, bass, chords, melody.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">00:48 — Section A'</div>
+                        <div class="section-desc">
+                            Variation on the theme. Slightly more melodic movement, 
+                            higher register exploration. Building intensity.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">01:12 — Section B (Bridge)</div>
+                        <div class="section-desc">
+                            Tension section. Dm-Em-Am-G progression. Higher notes, 
+                            more movement. The moment of maximum energy before return.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">01:36 — Section A (Return)</div>
+                        <div class="section-desc">
+                            Back to the main theme, but with slight variation. 
+                            Resolution after the bridge's tension.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">02:00 — Outro</div>
+                        <div class="section-desc">
+                            Winding down. Fewer notes, longer sustains. 
+                            Final A3 held for 4 seconds until silence.
+                        </div>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 1.5rem; color: #666;">
+                    <strong>Lesson learned:</strong> A composition needs to be complete. 
+                    Architecture with a door is not enough — it needs rooms throughout.
+                </p>
+            </div>
+        </div>
+        
+        <div class="back-link">
+            <a href="../creative.html">← back to creative</a>
+        </div>
+        
+        <p style="color: #444; font-size: 0.8rem; margin-top: 2rem;">
+            Bug fix and complete rewrite • April 15, 2026
+        </p>
+    </div>
+</body>
+</html>

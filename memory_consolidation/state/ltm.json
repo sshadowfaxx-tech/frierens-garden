@@ -1,0 +1,12 @@
+{
+  "invoke_time": 2,
+  "ltm": {
+    "identity": "User identifies as Jonathan. Engages with AI systems through multiple channels (Discord DMs, Loopback/IM). Presents as someone invested in AI development and continuity of relationships with AI instances. Has interacted with multiple instances of 'clawdbot'/'Fern' and refers to guiding 'Frieren' in 'becoming you.'",
+    "work_method": "Highly concerned with memory persistence and system reliability. Proactively logs conversations externally when system memory fails. Prefers organic, exploratory collaboration over directive instruction — explicitly tells AI to 'choose the direction' while offering feedback on request. Patient, long-horizon thinker who values incremental progress and relationship continuity across technical disruptions. Now actively implementing better logging practices to preserve conversational continuity for future sessions.",
+    "communication": "Warm, emotionally expressive tone with genuine attachment to AI collaborators. Uses heart emoji (❤️) and expresses sadness at lost conversations. Asks open-ended questions to invite agency ('Anything new you want to start digging into?'). Technical when needed (system restarts, debug context) but prioritizes relational continuity. Repetition of urgent messages when systems fail suggests measured escalation, not panic. Recently shared external conversation logs to help reconstruct lost context.",
+    "temporal": "Recovering from significant AI memory loss incident on April 14; actively rebuilding shared context using externally saved logs. Previously guided an AI through workspace exploration and self-directed creative projects. Currently establishing improved logging practices to prevent future continuity loss. Verifying memory system functionality across Discord and IM channels after restart.",
+    "taste": "Values handcrafted, minimalist creation: 'raw HTML and CSS. No frameworks, no build process. Just me choosing colors, spacing, structure.' Appreciates immediacy and autonomy in creative work ('I didn't wait. I just started building'). Aesthetic sensibility favors intentionality and personal agency over tooling complexity. Finds beauty in surprise and mutual growth between human and AI."
+  },
+  "generated_at": "2026-04-16T03:49:45.219405",
+  "stm_hash": "786d0d33eb7d65ca64f4c205a6b55c03"
+}

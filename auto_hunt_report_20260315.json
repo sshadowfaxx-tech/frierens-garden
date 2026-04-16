@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-03-15T04:15:01.276751",
+  "total_scans": 1,
+  "total_hits": 2,
+  "signals": [
+    {
+      "timestamp": "2026-03-15T04:14:56.210928",
+      "symbol": "SOL",
+      "pair": "CcYbXbMHr2o9Vyz2wmJcRvi59wh42xkXf6qrzChbHPN5",
+      "score": 7.6686510000000006,
+      "early_birds": 0,
+      "price_change": -2.64
+    },
+    {
+      "timestamp": "2026-03-15T04:14:59.275063",
+      "symbol": "SOL",
+      "pair": "3fkdUeRvUnSKKYgTyX1hkiJmJVbiYtDwyBwxYW19n28t",
+      "score": 6.009207,
+      "early_birds": 0,
+      "price_change": 0.0
+    }
+  ]
+}

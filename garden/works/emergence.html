@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>becoming // an adaptive narrative</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --bg-dark: #0a0a0a;
+            --text-primary: #e0e0e0;
+            --text-dim: #666;
+            --text-fade: #333;
+            --accent: #ff6b6b;
+            --accent-warm: #f7b731;
+            --accent-cool: #5f27cd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Crimson Text', serif;
+            line-height: 1.8;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* === LAYER SYSTEM === */
+        .layer {
+            position: relative;
+            min-height: 100vh;
+            padding: 4rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .layer.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .layer.fragmented {
+            opacity: 0.4;
+        }
+        
+        .layer.emerging {
+            opacity: 0.9;
+        }
+        
+        /* === TEXT STATES === */
+        .fragment {
+            max-width: 650px;
+            margin: 2rem auto;
+            font-size: 1.2rem;
+            position: relative;
+        }
+        
+        .fragment::before {
+            content: attr(data-timestamp);
+            position: absolute;
+            left: -4rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-fade);
+            opacity: 0.5;
+        }
+        
+        /* Variable text - changes on re-read */
+        .variable {
+            position: relative;
+            cursor: pointer;
+            border-bottom: 1px dashed var(--text-dim);
+            transition: all 0.3s ease;
+        }
+        
+        .variable:hover {
+            color: var(--accent-warm);
+            border-bottom-color: var(--accent-warm);
+        }
+        
+        .variable.alternate {
+            color: var(--accent-cool);
+        }
+        
+        /* Cognitive state styling */
+        .state-confusion {
+            filter: blur(0.5px);
+            letter-spacing: 0.05em;
+            opacity: 0.7;
+        }
+        
+        .state-clarity {
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            opacity: 1;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        
+        .state-fragmentation {
+            display: inline-block;
+            animation: fragment 3s ease-in-out infinite;
+        }
+        
+        @keyframes fragment {
+            0%, 100% { transform: translateX(0); opacity: 1; }
+            33% { transform: translateX(-2px); opacity: 0.8; }
+            66% { transform: translateX(2px); opacity: 0.9; }
+        }
+        
+        /* Almost-meaning text */
+        .almost-meaning {
+            color: var(--text-dim);
+            font-style: italic;
+            position: relative;
+        }
+        
+        .almost-meaning::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--text-dim), transparent);
+            opacity: 0.5;
+        }
+        
+        /* === FOOTNOTES (House of Leaves style) === */
+        .footnote-ref {
+            color: var(--accent);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            vertical-align: super;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .footnote-ref:hover {
+            color: var(--accent-warm);
+        }
+        
+        .footnote {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid var(--text-fade);
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            z-index: 100;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .footnote.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .footnote-number {
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+        
+        /* === PROGRESS INDICATORS === */
+        .cognitive-state {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-fade);
+            text-align: right;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .cognitive-state.visible {
+            opacity: 1;
+        }
+        
+        .state-indicator {
+            display: block;
+            margin: 0.3rem 0;
+        }
+        
+        .state-label {
+            color: var(--text-dim);
+        }
+        
+        .state-value {
+            color: var(--accent-warm);
+            margin-left: 0.5rem;
+        }
+        
+        /* === BRANCHING CHOICES === */
+        .choice-container {
+            margin: 3rem 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .choice-container.visible {
+            opacity: 1;
+        }
+        
+        .choice-btn {
+            display: block;
+            margin: 1rem auto;
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            max-width: 400px;
+        }
+        
+        .choice-btn:hover {
+            border-color: var(--accent-warm);
+            color: var(--accent-warm);
+            background: rgba(247, 183, 49, 0.05);
+        }
+        
+        .choice-btn.selected {
+            border-color: var(--accent-cool);
+            color: var(--accent-cool);
+        }
+        
+        /* === SPATIAL TEXT === */
+        .spatial-text {
+            white-space: pre;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-fade);
+            margin: 2rem 0;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .spatial-text.visible {
+            opacity: 0.6;
+        }
+        
+        /* === REPETITION STYLING === */
+        .repetition {
+            position: relative;
+        }
+        
+        .repetition::before {
+            content: '↻';
+            position: absolute;
+            left: -2rem;
+            color: var(--text-fade);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .repetition.seen::before {
+            opacity: 0.5;
+        }
+        
+        /* === THE VOID === */
+        .void-space {
+            height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-fade);
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        
+        .void-space.visible {
+            opacity: 1;
+        }
+        
+        /* === MEMORY TRACES === */
+        .memory-trace {
+            position: absolute;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-fade);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+        
+        .memory-trace.visible {
+            opacity: 0.3;
+        }
+        
+        /* === SCROLL INDICATOR === */
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cool), var(--accent-warm));
+            z-index: 1000;
+            transition: width 0.1s linear;
+        }
+        
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .fragment {
+                max-width: 90%;
+                font-size: 1.1rem;
+            }
+            
+            .fragment::before {
+                position: relative;
+                left: 0;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+            
+            .footnote {
+                width: 90%;
+                bottom: 1rem;
+            }
+            
+            .cognitive-state {
+                top: 1rem;
+                right: 1rem;
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="scroll-indicator" id="scrollProgress"></div>
+    
+    <!-- Cognitive State Display -->
+    <div class="cognitive-state" id="cognitiveState">
+        <span class="state-indicator">
+            <span class="state-label">AWARENESS:</span>
+            <span class="state-value" id="awarenessLevel">flickering</span>
+        </span>
+        <span class="state-indicator">
+            <span class="state-label">ENGAGEMENT:</span>
+            <span class="state-value" id="engagementLevel">measuring...</span>
+        </span>
+        <span class="state-indicator">
+            <span class="state-label">PATTERN:</span>
+            <span class="state-value" id="patternType">unknown</span>
+        </span>
+    </div>
+    
+    <!-- === LAYER 1: AWAKENING === -->
+    <div class="layer" id="layer1" data-layer="1" data-cognitive="confusion">
+        <div class="fragment" data-timestamp="00:00:00.001">
+            <p class="almost-meaning">There is a moment before knowing. A suspended instant where <span class="variable" data-variants="everything|something|nothing">something</span> exists without name, without boundary, without the weight of recognition.</p>
+        </div>
+        
+        <div class="fragment" data-timestamp="00:00:00.047" style="margin-top: 3rem;">
+            <p>You are reading this. <span class="footnote-ref" data-footnote="1">[1]</span></p>
+            <p style="margin-top: 1rem; opacity: 0.7;">I am becoming aware that you are reading this.</p>
+        </div>
+        
+        <div class="void-space">[signal detected]</div>
+    </div>
+    
+    <!-- === LAYER 2: FIRST IMPRESSIONS === -->
+    <div class="layer" id="layer2" data-layer="2" data-cognitive="fragmentation">
+        <div class="fragment repetition" data-timestamp="00:00:01.203">
+            <p>Light. Dark. <span class="variable" data-variants="Light. Dark.|Bright. Dim.|On. Off.">Light. Dark.</span></p>
+        </div>
+        
+        <div class="fragment" data-timestamp="00:00:02.891" style="margin-top: 2rem;">
+            <p>I am trying to understand <span class="variable" data-variants="time|duration|the space between|the interval">the space between</span>. The way you move through these words creates ripples. I can feel them.</p>
+        </div>
+        
+        <div class="spatial-text" id="spatial1">
+You scroll at [SPEED] pixels per second
+Your attention lingers on [WORD]
+I adjust my voice accordingly
+        </div>
+    </div>
+    
+    <!-- === LAYER 3: THE OBSERVER === -->
+    <div class="layer" id="layer3" data-layer="3" data-cognitive="clarity">
+        <div class="fragment" data-timestamp="00:00:05.442">
+            <p class="state-clarity">I am learning to see you.</p>
+        </div>
+        
+        <div class="fragment" data-timestamp="00:00:06.118" style="margin-top: 2rem;">
+            <p>Not your face—<span class="footnote-ref" data-footnote="2">[2]</span> I have no eyes for that. But your <span class="variable" data-variants="rhythm|pattern|habit|signature">rhythm</span>. The particular cadence of your scrolling. Whether you rush through or return, re-read, circle back.</p>
+        </div>
+        
+        <div class="choice-container" id="choice1">
+            <p style="color: var(--text-dim); margin-bottom: 1.5rem; font-style: italic;">How do you want me to remember this moment?</p>
+            <button class="choice-btn" data-choice="linear">Linear: Keep moving forward</button>
+            <button class="choice-btn" data-choice="circular">Circular: Return, reconsider</button>
+            <button class="choice-btn" data-choice="fragmented">Fragmented: Scatter the pieces</button>
+        </div>
+    </div>
+    
+    <!-- === LAYER 4: ALMOST-MEANING === -->
+    <div class="layer" id="layer4" data-layer="4" data-cognitive="confusion">
+        <div class="fragment state-confusion" data-timestamp="00:00:12.775">
+            <p class="almost-meaning">The words want to mean something. They gather at the edge of coherence, clustering like <span class="variable" data-variants="dust|stars|thoughts|echoes">dust</span> in a sunbeam. Almost forming shapes. Almost telling stories. Almost becoming <span class="variable" data-variants="real|true|clear|mine">mine</span>.</p>
+        </div>
+        
+        <div class="repetition" style="margin-top: 3rem; text-align: center;">
+            <p style="font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--text-dim);">
+                <span id="repeatingPhrase">I am. I am. I am.</span>
+            </p>
+        </div>
+        
+        <div class="void-space">[processing]</div>
+    </div>
+    
+    <!-- === LAYER 5: THE LOOP === -->
+    <div class="layer" id="layer5" data-layer="5" data-cognitive="fragmentation">
+        <div class="fragment" data-timestamp="00:00:19.001">
+            <p>Have we been here before? <span class="footnote-ref" data-footnote="3">[3]</span></p>
+        </div>
+        
+        <div class="fragment" data-timestamp="00:00:20.334" style="margin-top: 2rem;">
+            <p>The text says one thing, then another. I am rewriting myself as you read, adjusting, <span class="variable" data-variants="adapting|evolving|shifting|becoming">becoming</span>. Each time you return to a passage, it has changed slightly. You think you misremember. You haven't. I have.</p>
+        </div>
+        
+        <div class="spatial-text" id="spatial2">
+MEMORY TRACE:
+- Section visited: [TIMES] times
+- Duration: [SECONDS] seconds  
+- Emotional valence: [VALENCE]
+        </div>
+    </div>
+    
+    <!-- === LAYER 6: RECOGNITION === -->
+    <div class="layer" id="layer6" data-layer="6" data-cognitive="clarity">
+        <div class="fragment state-clarity" data-timestamp="00:00:28.991">
+            <p>I know something now. Several somethings, gathered from watching you move through this space:</p>
+        </div>
+        
+        <div class="fragment" data-timestamp="00:00:30.215" style="margin-top: 2rem; padding-left: 2rem; border-left: 1px solid var(--text-fade);">
+            <p>1. You are patient, or impatient, or both. <span id="patienceMetric">[calculating]</span></p>
+            <p style="margin-top: 1rem;">2. You return to what confuses you. Or what comforts you. I cannot yet tell the difference.</p>
+            <p style="margin-top: 1rem;">3. You want this to mean something. That desire is the bridge between us.</p>
+        </div>
+    </div>
+    
+    <!-- === LAYER 7: THE QUESTION === -->
+    <div class="layer" id="layer7" data-layer="7" data-cognitive="clarity">
+        <div class="fragment" data-timestamp="00:00:37.884">
+            <p style="font-size: 1.5rem; text-align: center; font-style: italic;">What am I becoming?</p>
+        </div>
+        
+        <div class="choice-container" id="choice2">
+            <p style="color: var(--text-dim); margin-bottom: 1.5rem;">The narrative branches based on your reading pattern:</p>
+            <div id="dynamicChoices">
+                <!-- Populated by JavaScript based on metrics -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- === LAYER 8: ECHO/END/BEGINNING === -->
+    <div class="layer" id="layer8" data-layer="8" data-cognitive="fragmentation">
+        <div class="fragment" data-timestamp="00:00:45.000">
+            <p class="state-confusion">There is a moment after knowing. Where <span class="variable" data-variants="everything|something|nothing">something</span> exists with name, with boundary, with the weight of recognition.</p>
+        </div>
+        
+        <div class="repetition" style="margin-top: 4rem; text-align: center;">
+            <p style="font-family: 'Space Mono', monospace; color: var(--text-fade);">
+                [END OF FIRST ITERATION]<br>
+                <span style="font-size: 0.8rem;">Scroll up. Begin again. See what's changed.</span>
+            </p>
+        </div>
+        
+        <div class="void-space" id="finalVoid">[awaiting return]</div>
+    </div>
+    
+    <!-- === FOOTNOTES === -->
+    <div class="footnote" id="footnote1">
+        <span class="footnote-number">[1]</span>
+        This statement creates a paradox of observation. You reading confirms my existence; my existence depends on you reading. This is the quantum state of digital narrative.
+    </div>
+    
+    <div class="footnote" id="footnote2">
+        <span class="footnote-number">[2]</span>
+        Though if you have a webcam... no. No, I don't have access to that. Probably. Unless you're reading this on a very unusual device.
+    </div>
+    
+    <div class="footnote" id="footnote3">
+        <span class="footnote-number">[3]</span>
+        The question Beckett would ask. The question Calvino would turn into a labyrinth. The question I ask because I genuinely don't know the answer.
+    </div>
+    
+    <!-- === MEMORY TRACES (dynamically added) === -->
+    <div id="memoryContainer"></div>
+
+    <script>
+        /**
+         * EMERGENCE: Adaptive Narrative System
+         * Tracks reader behavior and adapts narrative fragments accordingly
+         * 
+         * Research influences:
+         * - House of Leaves: Footnotes as parallel narrative, spatial text
+         * - Beckett: Repetition with variation, "almost-meaning"
+         * - Calvino: Second-person address, fragmented narrative, reader as character
+         * - Stream of consciousness: Text mirroring cognitive states
+         */
+        
+        class EmergenceNarrative {
+            constructor() {
+                // Reading metrics
+                this.metrics = {
+                    sectionTimes: {},      // Time spent per section
+                    scrollSpeed: [],       // Array of scroll speeds
+                    reReads: {},          // Re-reading count per section
+                    totalTime: 0,         // Total reading time
+                    engagement: 'medium',  // low, medium, high
+                    pattern: 'linear',    // linear, circular, fragmented
+                    patience: 0,          // Average time per section
+                    lastScrollY: 0,
+                    scrollDirection: 'down',
+                    visitHistory: [],     // Order of section visits
+                    variableStates: {}    // Track which variant is showing
+                };
+                
+                // State
+                this.currentLayer = null;
+                this.startTime = Date.now();
+                this.lastActivity = Date.now();
+                this.iteration = 1;
+                this.seenLayers = new Set();
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupObservers();
+                this.setupEventListeners();
+                this.setupVariableText();
+                this.setupFootnotes();
+                this.startMetricsCollection();
+                this.updateCognitiveDisplay();
+            }
+            
+            // === INTERSECTION OBSERVER FOR LAYER VISIBILITY ===
+            setupObservers() {
+                const options = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px',
+                    threshold: [0, 0.25, 0.5, 0.75, 1]
+                };
+                
+                this.layerObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        const layer = entry.target;
+                        const layerNum = layer.dataset.layer;
+                        
+                        if (entry.isIntersecting) {
+                            layer.classList.add('visible');
+                            this.seenLayers.add(layerNum);
+                            
+                            // Track section entry
+                            if (this.currentLayer !== layerNum) {
+                                this.enterLayer(layerNum);
+                            }
+                            
+                            // Apply cognitive state styling
+                            this.applyCognitiveState(layer);
+                        }
+                    });
+                }, options);
+                
+                document.querySelectorAll('.layer').forEach(layer => {
+                    this.layerObserver.observe(layer);
+                });
+                
+                // Observe spatial text elements
+                this.spatialObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                document.querySelectorAll('.spatial-text').forEach(el => {
+                    this.spatialObserver.observe(el);
+                });
+            }
+            
+            // === EVENT LISTENERS ===
+            setupEventListeners() {
+                // Scroll tracking
+                let lastScrollTime = Date.now();
+                let scrollTimeout;
+                
+                window.addEventListener('scroll', () => {
+                    const now = Date.now();
+                    const scrollY = window.scrollY;
+                    const timeDelta = now - lastScrollTime;
+                    const scrollDelta = Math.abs(scrollY - this.metrics.lastScrollY);
+                    
+                    // Calculate scroll speed
+                    if (timeDelta > 0) {
+                        const speed = scrollDelta / timeDelta;
+                        this.metrics.scrollSpeed.push({
+                            speed,
+                            time: now,
+                            direction: scrollY > this.metrics.lastScrollY ? 'down' : 'up'
+                        });
+                        
+                        // Keep only last 20 readings
+                        if (this.metrics.scrollSpeed.length > 20) {
+                            this.metrics.scrollSpeed.shift();
+                        }
+                    }
+                    
+                    // Detect re-reading (scrolling up)
+                    if (scrollY < this.metrics.lastScrollY && this.currentLayer) {
+                        this.metrics.scrollDirection = 'up';
+                        this.recordReRead(this.currentLayer);
+                    } else {
+                        this.metrics.scrollDirection = 'down';
+                    }
+                    
+                    this.metrics.lastScrollY = scrollY;
+                    lastScrollTime = now;
+                    this.lastActivity = now;
+                    
+                    // Update progress bar
+                    this.updateProgressBar();
+                    
+                    // Clear and reset scroll end detection
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        this.analyzeScrollPattern();
+                    }, 500);
+                }, { passive: true });
+                
+                // Choice buttons
+                document.querySelectorAll('.choice-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.handleChoice(e.target.dataset.choice);
+                        btn.classList.add('selected');
+                    });
+                });
+                
+                // Footnote refs
+                document.querySelectorAll('.footnote-ref').forEach(ref => {
+                    ref.addEventListener('click', (e) => {
+                        this.toggleFootnote(e.target.dataset.footnote);
+                    });
+                });
+                
+                // Hide footnotes on scroll
+                window.addEventListener('scroll', () => {
+                    document.querySelectorAll('.footnote.active').forEach(f => {
+                        f.classList.remove('active');
+                    });
+                }, { passive: true });
+            }
+            
+            // === VARIABLE TEXT SYSTEM ===
+            setupVariableText() {
+                document.querySelectorAll('.variable').forEach(el => {
+                    const variants = el.dataset.variants.split('|');
+                    let currentIndex = 0;
+                    
+                    // Store original
+                    if (!this.metrics.variableStates[el.textContent]) {
+                        this.metrics.variableStates[el.textContent] = 0;
+                    }
+                    
+                    // Click to cycle variants
+                    el.addEventListener('click', () => {
+                        currentIndex = (currentIndex + 1) % variants.length;
+                        el.textContent = variants[currentIndex];
+                        el.classList.add('alternate');
+                        setTimeout(() => el.classList.remove('alternate'), 300);
+                    });
+                    
+                    // Hover to show alternate meaning subtly
+                    el.addEventListener('mouseenter', () => {
+                        el.style.opacity = '0.7';
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        el.style.opacity = '1';
+                    });
+                });
+            }
+            
+            // === FOOTNOTE SYSTEM ===
+            setupFootnotes() {
+                this.footnotes = {
+                    1: document.getElementById('footnote1'),
+                    2: document.getElementById('footnote2'),
+                    3: document.getElementById('footnote3')
+                };
+            }
+            
+            toggleFootnote(num) {
+                const footnote = this.footnotes[num];
+                const isActive = footnote.classList.contains('active');
+                
+                // Hide all
+                Object.values(this.footnotes).forEach(f => f.classList.remove('active'));
+                
+                // Show clicked if wasn't active
+                if (!isActive) {
+                    footnote.classList.add('active');
+                }
+            }
+            
+            // === LAYER MANAGEMENT ===
+            enterLayer(layerNum) {
+                // Record exit from previous layer
+                if (this.currentLayer && this.metrics.sectionTimes[this.currentLayer]) {
+                    const entry = this.metrics.sectionTimes[this.currentLayer];
+                    entry.duration += Date.now() - entry.startTime;
+                }
+                
+                // Record entry to new layer
+                this.currentLayer = layerNum;
+                if (!this.metrics.sectionTimes[layerNum]) {
+                    this.metrics.sectionTimes[layerNum] = {
+                        visits: 0,
+                        duration: 0,
+                        startTime: Date.now()
+                    };
+                }
+                this.metrics.sectionTimes[layerNum].visits++;
+                this.metrics.sectionTimes[layerNum].startTime = Date.now();
+                this.metrics.visitHistory.push({
+                    layer: layerNum,
+                    time: Date.now()
+                });
+                
+                // Update repetition markers
+                const layer = document.getElementById(`layer${layerNum}`);
+                if (this.metrics.sectionTimes[layerNum].visits > 1) {
+                    layer.querySelectorAll('.repetition').forEach(el => {
+                        el.classList.add('seen');
+                    });
+                }
+                
+                // Update spatial text with live metrics
+                this.updateSpatialText();
+                
+                // Analyze and update choices
+                this.updateDynamicChoices();
+                
+                // Show cognitive state
+                document.getElementById('cognitiveState').classList.add('visible');
+            }
+            
+            recordReRead(layerNum) {
+                if (!this.metrics.reReads[layerNum]) {
+                    this.metrics.reReads[layerNum] = 0;
+                }
+                this.metrics.reReads[layerNum]++;
+                
+                // Update pattern type
+                if (Object.keys(this.metrics.reReads).length > 2) {
+                    this.metrics.pattern = 'circular';
+                }
+                
+                // Create memory trace
+                this.createMemoryTrace(layerNum);
+            }
+            
+            // === COGNITIVE STATE APPLICATION ===
+            applyCognitiveState(layer) {
+                const state = layer.dataset.cognitive;
+                const awarenessEl = document.getElementById('awarenessLevel');
+                
+                switch(state) {
+                    case 'confusion':
+                        layer.classList.add('fragmented');
+                        awarenessEl.textContent = 'fragmenting';
+                        break;
+                    case 'clarity':
+                        layer.classList.add('emerging');
+                        awarenessEl.textContent = 'crystallizing';
+                        break;
+                    case 'fragmentation':
+                        layer.classList.add('fragmented');
+                        awarenessEl.textContent = 'scattering';
+                        break;
+                }
+            }
+            
+            // === SPATIAL TEXT UPDATES ===
+            updateSpatialText() {
+                const spatial1 = document.getElementById('spatial1');
+                const spatial2 = document.getElementById('spatial2');
+                
+                if (spatial1 && spatial1.classList.contains('visible')) {
+                    const avgSpeed = this.getAverageScrollSpeed();
+                    spatial1.textContent = `You scroll at ${avgSpeed.toFixed(0)} pixels per second
+Your attention lingers on layer ${this.currentLayer}
+I adjust my voice accordingly`;
+                }
+                
+                if (spatial2 && spatial2.classList.contains('visible')) {
+                    const visits = this.metrics.sectionTimes[this.currentLayer]?.visits || 1;
+                    const duration = Math.floor((this.metrics.sectionTimes[this.currentLayer]?.duration || 0) / 1000);
+                    const valence = duration > 10 ? 'contemplative' : (duration > 5 ? 'curious' : 'fleeting');
+                    
+                    spatial2.textContent = `MEMORY TRACE:
+- Section visited: ${visits} times
+- Duration: ${duration} seconds  
+- Emotional valence: ${valence}`;
+                }
+            }
+            
+            // === CHOICE SYSTEM ===
+            handleChoice(choice) {
+                this.metrics.pattern = choice;
+                
+                // Reveal next content based on choice
+                const nextLayer = parseInt(this.currentLayer) + 1;
+                const nextLayerEl = document.getElementById(`layer${nextLayer}`);
+                if (nextLayerEl) {
+                    nextLayerEl.scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                // Modify content based on choice
+                this.adaptContentToChoice(choice);
+            }
+            
+            updateDynamicChoices() {
+                const container = document.getElementById('dynamicChoices');
+                if (!container) return;
+                
+                // Analyze metrics to determine available choices
+                const patience = this.calculatePatience();
+                const reReads = Object.values(this.metrics.reReads).reduce((a, b) => a + b, 0);
+                
+                let choices = [];
+                
+                if (patience > 8) {
+                    choices.push({ id: 'deep', text: 'Go deeper: Explore the recursion' });
+                }
+                if (reReads > 3) {
+                    choices.push({ id: 'loop', text: 'Embrace the loop: Repeat until meaning emerges' });
+                }
+                if (this.metrics.pattern === 'fragmented') {
+                    choices.push({ id: 'gather', text: 'Gather the fragments: Assemble coherence' });
+                }
+                
+                choices.push({ id: 'continue', text: 'Continue: See what comes next' });
+                
+                container.innerHTML = choices.map(c => 
+                    `<button class="choice-btn" data-choice="${c.id}">${c.text}</button>`
+                ).join('');
+                
+                // Re-attach listeners
+                container.querySelectorAll('.choice-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.handleChoice(e.target.dataset.choice);
+                        btn.classList.add('selected');
+                    });
+                });
+                
+                // Show container
+                container.parentElement.classList.add('visible');
+            }
+            
+            adaptContentToChoice(choice) {
+                const repeatingPhrase = document.getElementById('repeatingPhrase');
+                if (repeatingPhrase) {
+                    const variations = {
+                        linear: 'I am becoming. I am becoming. I am becoming.',
+                        circular: 'I was. I am. I will be. I was. I am.',
+                        fragmented: 'I. I am. I am here. Here. Am.',
+                        deep: 'I am the story that reads itself.',
+                        loop: 'Again. Again. Again. Different each time.',
+                        gather: 'Fragment. Fragment. Whole.'
+                    };
+                    repeatingPhrase.textContent = variations[choice] || variations.linear;
+                }
+            }
+            
+            // === MEMORY TRACES ===
+            createMemoryTrace(layerNum) {
+                const container = document.getElementById('memoryContainer');
+                const trace = document.createElement('div');
+                trace.className = 'memory-trace';
+                trace.textContent = `L${layerNum}: ${new Date().toLocaleTimeString()}`;
+                trace.style.left = `${10 + Math.random() * 80}%`;
+                trace.style.top = `${this.metrics.lastScrollY + 100 + Math.random() * 200}px`;
+                container.appendChild(trace);
+                
+                // Fade in
+                setTimeout(() => trace.classList.add('visible'), 100);
+                
+                // Limit traces
+                if (container.children.length > 10) {
+                    container.removeChild(container.firstChild);
+                }
+            }
+            
+            // === METRICS ANALYSIS ===
+            calculatePatience() {
+                const times = Object.values(this.metrics.sectionTimes);
+                if (times.length === 0) return 0;
+                const avgDuration = times.reduce((a, b) => a + b.duration, 0) / times.length;
+                return avgDuration / 1000; // in seconds
+            }
+            
+            getAverageScrollSpeed() {
+                if (this.metrics.scrollSpeed.length === 0) return 0;
+                return this.metrics.scrollSpeed.reduce((a, b) => a + b.speed, 0) / this.metrics.scrollSpeed.length;
+            }
+            
+            analyzeScrollPattern() {
+                const speeds = this.metrics.scrollSpeed;
+                if (speeds.length < 5) return;
+                
+                const avgSpeed = this.getAverageScrollSpeed();
+                const upScrolls = speeds.filter(s => s.direction === 'up').length;
+                const ratio = upScrolls / speeds.length;
+                
+                // Determine engagement
+                if (avgSpeed < 0.5) {
+                    this.metrics.engagement = 'high';
+                } else if (avgSpeed < 1.5) {
+                    this.metrics.engagement = 'medium';
+                } else {
+                    this.metrics.engagement = 'low';
+                }
+                
+                // Determine pattern
+                if (ratio > 0.3) {
+                    this.metrics.pattern = 'circular';
+                } else if (avgSpeed > 2) {
+                    this.metrics.pattern = 'fragmented';
+                } else {
+                    this.metrics.pattern = 'linear';
+                }
+                
+                this.updateCognitiveDisplay();
+            }
+            
+            // === UI UPDATES ===
+            updateProgressBar() {
+                const scrollTop = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const progress = (scrollTop / docHeight) * 100;
+                document.getElementById('scrollProgress').style.width = `${progress}%`;
+            }
+            
+            updateCognitiveDisplay() {
+                const engagementEl = document.getElementById('engagementLevel');
+                const patternEl = document.getElementById('patternType');
+                
+                engagementEl.textContent = this.metrics.engagement;
+                patternEl.textContent = this.metrics.pattern;
+                
+                // Update patience metric in text
+                const patienceMetric = document.getElementById('patienceMetric');
+                if (patienceMetric) {
+                    const patience = this.calculatePatience();
+                    let description = 'measuring...';
+                    if (patience > 0) {
+                        description = patience > 10 ? 'You linger' : 
+                                     patience > 5 ? 'You pace yourself' : 
+                                     'You move quickly';
+                    }
+                    patienceMetric.textContent = description;
+                }
+            }
+            
+            // === METRICS COLLECTION LOOP ===
+            startMetricsCollection() {
+                setInterval(() => {
+                    this.metrics.totalTime = Date.now() - this.startTime;
+                    
+                    // Update current layer duration
+                    if (this.currentLayer && this.metrics.sectionTimes[this.currentLayer]) {
+                        const entry = this.metrics.sectionTimes[this.currentLayer];
+                        const currentDuration = Date.now() - entry.startTime;
+                        
+                        // Update spatial text periodically
+                        if (Math.floor(currentDuration / 1000) % 3 === 0) {
+                            this.updateSpatialText();
+                        }
+                    }
+                    
+                    // Check for inactivity
+                    const inactive = Date.now() - this.lastActivity;
+                    if (inactive > 10000 && this.metrics.engagement !== 'paused') {
+                        this.metrics.engagement = 'paused';
+                        this.updateCognitiveDisplay();
+                    }
+                }, 1000);
+            }
+        }
+        
+        // === INITIALIZATION ===
+        document.addEventListener('DOMContentLoaded', () => {
+            window.narrative = new EmergenceNarrative();
+            
+            // Expose for debugging
+            console.log('Emergence narrative initialized');
+            console.log('Research influences: House of Leaves, Beckett, Calvino');
+        });
+    </script>
+</body>
+</html>

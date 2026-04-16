@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempest Colours</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, rgb(89, 148, 44), rgb(86, 174, 76));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Georgia', serif;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mood {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+        
+        .data {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            text-align: center;
+            line-height: 1.8;
+        }
+        
+        .swatch {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .timestamp {
+            position: absolute;
+            bottom: 2rem;
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="mood">gentle</div>
+    <div class="data">
+        21.5°C &nbsp;•&nbsp; 57% humidity &nbsp;•&nbsp; 5.6 km/h wind
+    </div>
+    <div class="swatch">
+        hue: 94° &nbsp;|&nbsp; sat: 70% &nbsp;|&nbsp; bri: 58%
+    </div>
+    <div class="timestamp">tempest_colours.py &nbsp;•&nbsp; 2026-04-14 13:25</div>
+</body>
+</html>

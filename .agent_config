@@ -1,0 +1,23 @@
+# Agent Trading Configuration
+
+## Channels to Monitor
+- CHANNEL_CLUSTER_PINGS=-1003640122337
+- CHANNEL_RAW_PINGS=-1003784020043
+- USER_ID=5893099179
+
+## Starting Balance
+PAPER_BALANCE=2.0 SOL
+
+## Mode
+MODE=LEARNING
+
+## Learning Phase
+START_TIME=2026-03-25T11:56:00+08:00
+TRADING_STARTS_AFTER=1 hour
+
+## Guidelines
+- Watch for 1 hour before trading
+- Study individual wallet patterns, not just clusters
+- Review historical trades for each wallet
+- Flexible entry criteria (not strict)
+- Focus on learning wallet behavior first

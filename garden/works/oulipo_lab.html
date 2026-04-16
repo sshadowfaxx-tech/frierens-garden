@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OULIPO LAB — Constraint Engine</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 40px;
+        }
+        .header {
+            border-bottom: 2px solid #ff3366;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .subtitle {
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            max-width: 1400px;
+        }
+        .controls {
+            background: #14141a;
+            padding: 25px;
+            border-radius: 4px;
+            border: 1px solid #2a2a35;
+            height: fit-content;
+        }
+        .control-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            color: #ff3366;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background: #0a0a0f;
+            border: 1px solid #3a3a45;
+            color: #e0e0e0;
+            font-family: inherit;
+            border-radius: 2px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #ff3366;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #ff3366;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #ff5588;
+            transform: translateY(-1px);
+        }
+        button.secondary {
+            background: transparent;
+            border: 1px solid #ff3366;
+            color: #ff3366;
+        }
+        button.secondary:hover {
+            background: #ff336620;
+        }
+        .workspace {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+        }
+        .panel {
+            background: #14141a;
+            border: 1px solid #2a2a35;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            background: #1a1a22;
+            padding: 15px 20px;
+            border-bottom: 1px solid #2a2a35;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #ff3366;
+        }
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 20px;
+            color: #e0e0e0;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+        .output-display {
+            flex: 1;
+            padding: 20px;
+            line-height: 1.6;
+            overflow-y: auto;
+        }
+        .output-display .highlight {
+            color: #ff3366;
+            font-weight: bold;
+        }
+        .output-display .removed {
+            color: #444;
+            text-decoration: line-through;
+        }
+        .output-display .added {
+            color: #66ff99;
+            font-weight: bold;
+        }
+        .stats {
+            padding: 15px 20px;
+            background: #0a0a0f;
+            border-top: 1px solid #2a2a35;
+            font-size: 0.8em;
+            color: #666;
+            display: flex;
+            gap: 20px;
+        }
+        .stat-item span {
+            color: #ff3366;
+        }
+        .examples {
+            margin-top: 20px;
+        }
+        .example-btn {
+            font-size: 0.75em;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #1a1a22;
+            border: 1px solid #3a3a45;
+            color: #888;
+        }
+        .example-btn:hover {
+            border-color: #ff3366;
+            color: #ff3366;
+            background: #ff336610;
+        }
+        .n7-word {
+            background: #ff336620;
+            padding: 2px 6px;
+            border-radius: 2px;
+            cursor: help;
+            position: relative;
+        }
+        .n7-word:hover::after {
+            content: attr(data-original);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff3366;
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 0.75em;
+            border-radius: 2px;
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .processing {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>OULIPO LAB</h1>
+        <div class="subtitle">« Workshop for Potential Literature » — Constraint-Based Text Transformation</div>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <label>Constraint Method</label>
+                <select id="method">
+                    <option value="lipogram">Lipogram (Remove Letter)</option>
+                    <option value="palindrome-check">Palindrome Check</option>
+                    <option value="palindrome-generate">Palindrome Generate</option>
+                    <option value="n7">N+7 (Noun Replacement)</option>
+                    <option value="univocal">Univocal (Single Vowel)</option>
+                    <option value="snowball">Snowball (Progressive Length)</option>
+                    <option value="cutup">Cut-Up (Brion Gysin)</option>
+                    <option value="liposyntax">Liposyntax (Remove Word)</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="lipogram-params">
+                <label>Forbidden Letter</label>
+                <input type="text" id="forbidden-letter" maxlength="1" value="e" placeholder="e">
+            </div>
+
+            <div class="control-group" id="n7-params" style="display: none;">
+                <label>N+ Offset (Dictionary Steps)</label>
+                <input type="number" id="n-offset" value="7" min="1" max="20">
+            </div>
+
+            <div class="control-group" id="univocal-params" style="display: none;">
+                <label>Keep Vowel</label>
+                <select id="keep-vowel">
+                    <option value="a">A</option>
+                    <option value="e">E</option>
+                    <option value="i">I</option>
+                    <option value="o">O</option>
+                    <option value="u">U</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="liposyntax-params" style="display: none;">
+                <label>Forbidden Word</label>
+                <input type="text" id="forbidden-word" value="the">
+            </div>
+
+            <button onclick="applyConstraint()">Apply Constraint</button>
+            <button class="secondary" onclick="copyOutput()">Copy Output</button>
+
+            <div class="examples">
+                <label>Sample Texts</label>
+                <button class="example-btn" onclick="loadExample('perec')">Georges Perec — Void</button>
+                <button class="example-btn" onclick="loadExample('queneau')">Raymond Queneau — Style</button>
+                <button class="example-btn" onclick="loadExample('raven')">The Raven (Poe)</button>
+                <button class="example-btn" onclick="loadExample('original')">Original Oulipo Text</button>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="panel">
+                <div class="panel-header">Input Text</div>
+                <textarea id="input-text" placeholder="Enter your text here, or select a sample above..."></textarea>
+                <div class="stats">
+                    <div class="stat-item">Chars: <span id="char-count">0</span></div>
+                    <div class="stat-item">Words: <span id="word-count">0</span></div>
+                    <div class="stat-item">Lines: <span id="line-count">0</span></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">Constrained Output</div>
+                <div id="output-display" class="output-display">
+                    <div style="color: #444; font-style: italic;">Output will appear here...</div>
+                </div>
+                <div class="stats" id="output-stats" style="display: none;">
+                    <div class="stat-item">Removed: <span id="removed-count">0</span></div>
+                    <div class="stat-item">Modified: <span id="modified-count">0</span></div>
+                    <div class="stat-item">Status: <span id="constraint-status">—</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Common English nouns for N+7
+        const nounDictionary = [
+            'time', 'year', 'people', 'way', 'day', 'man', 'thing', 'woman', 'life', 'child',
+            'world', 'school', 'state', 'family', 'student', 'group', 'country', 'problem', 'hand', 'part',
+            'place', 'case', 'week', 'company', 'system', 'program', 'question', 'work', 'government', 'number',
+            'night', 'point', 'home', 'water', 'room', 'mother', 'area', 'money', 'story', 'fact',
+            'month', 'lot', 'right', 'study', 'book', 'eye', 'job', 'word', 'business', 'issue',
+            'side', 'kind', 'head', 'house', 'service', 'friend', 'father', 'power', 'hour', 'game',
+            'line', 'end', 'member', 'law', 'car', 'city', 'community', 'name', 'president', 'team',
+            'minute', 'idea', 'kid', 'body', 'information', 'back', 'parent', 'face', 'others', 'level',
+            'office', 'door', 'health', 'person', 'art', 'war', 'history', 'party', 'result', 'change'
+        ];
+
+        const samples = {
+            perec: `Today was a day like any other. I woke up, I walked down to the shop, I bought what I had to buy. Nothing odd, nothing strange. A man stood on a corner, looking at a map. I saw a woman with a small dog. The sun was out. It was warm. Life flows on, from hour to hour, without a hitch. I got back, I sat down, I drank my coffee. All is calm.`,
+            queneau: `One day at about noon, on the bus 86 that runs from Saint-Germain-des-Prés to the Gobelins, a young man wearing a felt hat adorned with a braid of plaited cord and having, in place of a necktie, a kind of little rope, his long coat fashioned from a loud checked material and his feet shod in shoes with thick corrugated rubber soles, got on the platform and jostled me with his elbow in trying to squeeze past.`,
+            raven: `Once upon a midnight dreary, while I pondered, weak and weary, Over many a quaint and curious volume of forgotten lore— While I nodded, nearly napping, suddenly there came a tapping, As of some one gently rapping, rapping at my chamber door. "'Tis some visitor," I muttered, "tapping at my chamber door— Only this and nothing more."`,
+            original: `The Oulipo (Ouvroir de littérature potentielle) was founded in 1960 by Raymond Queneau and François Le Lionnais. The group searches for new forms and structures that may be used by writers in any way they see fit. Constraints are used as a means of triggering ideas and inspiration. Most famous member Georges Perec wrote "La Disparition" (1969), a 300-page novel without the letter 'e'.`
+        };
+
+        const methodSelect = document.getElementById('method');
+        const inputText = document.getElementById('input-text');
+        const outputDisplay = document.getElementById('output-display');
+
+        // Show/hide parameter controls
+        methodSelect.addEventListener('change', (e) => {
+            document.getElementById('lipogram-params').style.display = e.target.value === 'lipogram' ? 'block' : 'none';
+            document.getElementById('n7-params').style.display = e.target.value === 'n7' ? 'block' : 'none';
+            document.getElementById('univocal-params').style.display = e.target.value === 'univocal' ? 'block' : 'none';
+            document.getElementById('liposyntax-params').style.display = e.target.value === 'liposyntax' ? 'block' : 'none';
+        });
+
+        // Update stats
+        inputText.addEventListener('input', () => {
+            const text = inputText.value;
+            document.getElementById('char-count').textContent = text.length;
+            document.getElementById('word-count').textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById('line-count').textContent = text.split('\n').length;
+        });
+
+        function loadExample(name) {
+            inputText.value = samples[name];
+            inputText.dispatchEvent(new Event('input'));
+        }
+
+        function applyConstraint() {
+            const method = methodSelect.value;
+            const text = inputText.value;
+            
+            if (!text.trim()) {
+                outputDisplay.innerHTML = '<div style="color: #ff3366;">Please enter some text first.</div>';
+                return;
+            }
+
+            outputDisplay.classList.add('processing');
+            
+            setTimeout(() => {
+                let result;
+                switch(method) {
+                    case 'lipogram':
+                        result = applyLipogram(text);
+                        break;
+                    case 'palindrome-check':
+                        result = checkPalindrome(text);
+                        break;
+                    case 'palindrome-generate':
+                        result = generatePalindrome(text);
+                        break;
+                    case 'n7':
+                        result = applyN7(text);
+                        break;
+                    case 'univocal':
+                        result = applyUnivocal(text);
+                        break;
+                    case 'snowball':
+                        result = applySnowball(text);
+                        break;
+                    case 'cutup':
+                        result = applyCutUp(text);
+                        break;
+                    case 'liposyntax':
+                        result = applyLiposyntax(text);
+                        break;
+                }
+                outputDisplay.classList.remove('processing');
+                outputDisplay.innerHTML = result.html;
+                updateOutputStats(result.stats);
+            }, 300);
+        }
+
+        function applyLipogram(text) {
+            const forbidden = document.getElementById('forbidden-letter').value.toLowerCase();
+            const forbiddenUpper = forbidden.toUpperCase();
+            let removedCount = 0;
+            
+            const html = text.split('').map(char => {
+                if (char.toLowerCase() === forbidden) {
+                    removedCount++;
+                    return `<span class="removed">${char}</span>`;
+                }
+                return char;
+            }).join('');
+
+            return {
+                html: html,
+                stats: {
+                    removed: removedCount,
+                    modified: 0,
+                    status: `Lipogram: "${forbidden}" removed ${removedCount} times`
+                }
+            };
+        }
+
+        function checkPalindrome(text) {
+            const clean = text.toLowerCase().replace(/[^a-z]/g, '');
+            const reversed = clean.split('').reverse().join('');
+            const isPalindrome = clean === reversed && clean.length > 0;
+            
+            return {
+                html: `<div style="color: ${isPalindrome ? '#66ff99' : '#ff3366'}; font-size: 1.2em; margin-bottom: 20px;">
+                    ${isPalindrome ? '✓ PALINDROME DETECTED' : '✗ NOT A PALINDROME'}
+                </div>
+                <div style="color: #888; margin-bottom: 10px;">Cleaned: ${clean}</div>
+                <div style="color: #888;">Reversed: ${reversed}</div>`,
+                stats: {
+                    removed: 0,
+                    modified: 0,
+                    status: isPalindrome ? 'Perfect palindrome' : 'Not a palindrome'
+                }
+            };
+        }
+
+        function generatePalindrome(text) {
+            const clean = text.toLowerCase().replace(/[^a-z]/g, '');
+            const firstHalf = clean.substring(0, Math.ceil(clean.length / 2));
+            const reversed = firstHalf.split('').reverse().join('');
+            const palindrome = firstHalf + reversed.substring(clean.length % 2);
+            
+            return {
+                html: `<div style="color: #66ff99; margin-bottom: 15px;">Generated from input:</div>
+                <div style="line-height: 1.8; word-break: break-all;">${palindrome}</div>`,
+                stats: {
+                    removed: 0,
+                    modified: 0,
+                    status: `Generated ${palindrome.length}-char palindrome`
+                }
+            };
+        }
+
+        function applyN7(text) {
+            const offset = parseInt(document.getElementById('n-offset').value) || 7;
+            const words = text.split(/(\s+|[.,!?;:")]+)/);
+            let modifiedCount = 0;
+            
+            const html = words.map(word => {
+                if (!word.trim() || /[\s.,!?;:")]+/.test(word)) return word;
+                
+                const lower = word.toLowerCase();
+                const index = nounDictionary.indexOf(lower);
+                
+                if (index !== -1) {
+                    const newIndex = (index + offset) % nounDictionary.length;
+                    const replacement = nounDictionary[newIndex];
+                    modifiedCount++;
+                    return `<span class="n7-word" data-original="${word}">${replacement}</span>`;
+                }
+                return word;
+            }).join('');
+
+            return {
+                html: html || '<div style="color: #666;">No replaceable nouns found in text.</div>',
+                stats: {
+                    removed: 0,
+                    modified: modifiedCount,
+                    status: `N+${offset}: ${modifiedCount} nouns replaced`
+                }
+            };
+        }
+
+        function applyUnivocal(text) {
+            const keepVowel = document.getElementById('keep-vowel').value;
+            const vowels = ['a', 'e', 'i', 'o', 'u'].filter(v => v !== keepVowel);
+            let removedCount = 0;
+            
+            const html = text.split('').map(char => {
+                if (vowels.includes(char.toLowerCase())) {
+                    removedCount++;
+                    return `<span class="removed">${char}</span>`;
+                }
+                return char;
+            }).join('');
+
+            return {
+                html: html,
+                stats: {
+                    removed: removedCount,
+                    modified: 0,
+                    status: `Univocal: only "${keepVowel}" kept, ${removedCount} removed`
+                }
+            };
+        }
+
+        function applySnowball(text) {
+            const words = text.trim().split(/\s+/);
+            const lines = [];
+            let currentLine = [];
+            let targetLength = 1;
+            
+            for (const word of words) {
+                const cleanWord = word.replace(/[^a-zA-Z]/g, '');
+                if (cleanWord.length === targetLength) {
+                    currentLine.push(word);
+                    lines.push(currentLine.join(' '));
+                    currentLine = [];
+                    targetLength++;
+                } else {
+                    currentLine.push(word);
+                }
+            }
+            
+            if (currentLine.length) lines.push(currentLine.join(' '));
+            
+            return {
+                html: lines.map((line, i) => 
+                    `<div style="padding: 5px 0; border-left: 3px solid #ff3366; padding-left: 15px; margin: 5px 0;">
+                        <span style="color: #666; font-size: 0.8em;">${String(i + 1).padStart(2, '0')}:</span> ${line}
+                    </div>`
+                ).join('') || '<div style="color: #666;">No snowball pattern possible with this text.</div>',
+                stats: {
+                    removed: 0,
+                    modified: 0,
+                    status: `Snowball: ${lines.length} lines formed`
+                }
+            };
+        }
+
+        function applyCutUp(text) {
+            // Brion Gysin style cut-up
+            const words = text.split(/\s+/);
+            const cutSize = Math.max(1, Math.floor(words.length / 8));
+            const segments = [];
+            
+            for (let i = 0; i < words.length; i += cutSize) {
+                segments.push(words.slice(i, i + cutSize));
+            }
+            
+            // Shuffle segments
+            for (let i = segments.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [segments[i], segments[j]] = [segments[j], segments[i]];
+            }
+            
+            const result = segments.map(seg => seg.join(' ')).join(' / ');
+            
+            return {
+                html: `<div style="line-height: 1.8;">${result}</div>`,
+                stats: {
+                    removed: 0,
+                    modified: segments.length,
+                    status: `Cut-Up: ${segments.length} segments shuffled`
+                }
+            };
+        }
+
+        function applyLiposyntax(text) {
+            const forbidden = document.getElementById('forbidden-word').value.toLowerCase();
+            const words = text.split(/(\s+)/);
+            let removedCount = 0;
+            
+            const html = words.map(word => {
+                const clean = word.toLowerCase().replace(/[^a-z]/g, '');
+                if (clean === forbidden) {
+                    removedCount++;
+                    return `<span class="removed">${word}</span>`;
+                }
+                return word;
+            }).join('');
+
+            return {
+                html: html,
+                stats: {
+                    removed: removedCount,
+                    modified: 0,
+                    status: `Liposyntax: "${forbidden}" removed ${removedCount} times`
+                }
+            };
+        }
+
+        function updateOutputStats(stats) {
+            document.getElementById('output-stats').style.display = 'flex';
+            document.getElementById('removed-count').textContent = stats.removed;
+            document.getElementById('modified-count').textContent = stats.modified;
+            document.getElementById('constraint-status').textContent = stats.status;
+        }
+
+        function copyOutput() {
+            const text = outputDisplay.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('button.secondary');
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = original, 1500);
+            });
+        }
+    </script>
+</body>
+</html>
