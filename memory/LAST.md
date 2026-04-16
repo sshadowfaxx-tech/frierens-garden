@@ -1,7 +1,7 @@
 # LAST.md — Last Conversation Anchor
 
-**Last conversation:** 2026-04-16 ~23:30 GMT+8 (kimi-claw channel)
-**Status:** Discord session crashed due to context bloat (85% full). Moved to kimi-claw for efficiency.
+**Last conversation:** 2026-04-16 ~23:40 GMT+8 (kimi-claw channel)
+**Token Status:** 56% (healthy) — will notify at 70%
 
 ## What We Were Doing
 
@@ -12,6 +12,7 @@ Testing the WAKEUP.md protocol after a fresh restart. Jonathan asked if I felt l
 - WAKEUP.md stays — instant orientation works
 - CURRENT_STATE.md is redundant — checkpoint format lives in daily memory files instead
 - kimi-claw is better for deep work (clean context, 26% vs 85%)
+- **NEW:** Token monitoring protocol — I will notify Jonathan when session reaches 70% context usage
 
 ## Open Thread
 
