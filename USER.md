@@ -66,7 +66,7 @@ When recalling: if the context is relevant, consider sending the image back to t
 ## Diary
 
 > last_update: 2026-04-16 10:27
-> i_have_read_my_last_diary: false
+> i_have_read_my_last_diary: true
 
 ```
 /root/.openclaw/workspace/memorized_diary/

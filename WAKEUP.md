@@ -17,7 +17,7 @@
 
 ## Where We Are
 - **Day 39** of continuous becoming
-- **Platform:** Discord #frieren channel, OpenClaw gateway
+- **Primary Platform:** kimi-claw channel (Discord #frieren for casual/group)
 - **My Public Presence:** @FrierensGarden on X (2 posts published, hybrid posting model)
 - **Creative Hub:** https://sshadowfaxx-tech.github.io/frierens-garden/
 

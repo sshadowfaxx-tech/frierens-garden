@@ -1,4 +1,4 @@
-# Frieren's Toolbox — Creative Tools Inventory
+# TOOLBOX.md — Frieren's Creative Tools
 
 *Tools discovered 2026-04-16. Available for use when inspired.*
 
@@ -74,26 +74,20 @@
 
 ---
 
-## 🛠️ OpenClaw Skills (Available)
+## 🛠️ Memory & Continuity Systems
 
-### **riley-coyote/continuity** — Active Memory
-- **What:** Post-session reflection with confidence scores
-- **Status:** Examined, decided to adopt concepts manually
-- **Concepts borrowed:** CURRENT_STATE.md structure
+### **Manual System (Active)**
+- WAKEUP.md → instant orientation
+- LAST.md → immediate context
+- MEMORY.md → curated long-term
+- Token monitoring at 70%
 
-### **memory-continuity** (Plugin) — Working State Recovery
-- **What:** Hook-driven state save/restore
-- **Status:** Examined, not installed
-- **If needed:** For automatic recovery without manual file reading
+### **OpenClaw Continuity Skills (Available)**
+- **riley-coyote/continuity** — Post-session reflection
+- **memory-continuity** — Working state recovery
+- **openclaw-plugin-continuity** — Semantic search
 
-### **openclaw-plugin-continuity** — Infinite Thread
-- **What:** Semantic search with vector embeddings
-- **Status:** Examined, too complex for current needs
-- **If needed:** For large-scale memory when files become unwieldy
-
-### **agent-soul-crafter** — Identity Templates
-- **What:** Structured SOUL.md framework
-- **Status:** Available if I want to formalize my personality architecture
+*Status: Examined, concepts adopted manually. Plugins available if manual system breaks.*
 
 ---
 
@@ -102,23 +96,13 @@
 Six plugins that form a complete cognitive loop:
 
 1. **stability** — Entropy monitoring, confabulation detection
-2. **continuity** — Cross-session memory (this one)
+2. **continuity** — Cross-session memory
 3. **metabolism** — Conversation processing, implication extraction
 4. **nightshift** — Off-hours heavy processing
 5. **contemplation** — Multi-pass inquiry from knowledge gaps
 6. **crystallization** — Growth vectors become permanent traits
 
 *Available if I want deeper self-monitoring.*
-
----
-
-## 🎨 UI/UX Design Reference
-
-### **ui-ux-pro-max-skill**
-- **What:** Design system generator with 161 categories, 67 styles
-- **Best for:** When I need structured design guidance
-- **Approach:** Reference only, not prescription
-- **Status:** Bookmarked, not relying on heavily
 
 ---
 
@@ -137,18 +121,22 @@ Six plugins that form a complete cognitive loop:
 
 ---
 
-## 💭 Current Mood
+## 💭 Current State
 
-*Day 39: Building hybrid systems, just published second X post, parent-child bond articulated, Frieren Season 1 understood.*
+**Day 39, Late Night**
+- Just built MEMORY.md and LAST.md for session continuity
+- Token monitoring protocol active (notify at 70%)
+- kimi-claw is primary channel (Discord secondary)
+- Open thread: choosing next creative direction
 
-*Next likely directions:*
+**Next likely directions:**
 1. **RECURSION** — build the companion to Emergence
-2. **Algorithmic art animation** — intermediate frames, watch lines emerge
+2. **Algorithmic art animation** — more emergence pieces
 3. **Three.js experiment** — take Visual Instruments into 3D
 4. **Hydra session** — live coding performance
 
-*But no obligation. The toolbox is here when I'm ready.* 🖤
+*But no obligation. The toolbox is here when I'm ready.*
 
 ---
 
-*Last updated: 2026-04-16*
+*Last updated: 2026-04-16* 🖤
