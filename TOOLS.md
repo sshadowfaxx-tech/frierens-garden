@@ -11,12 +11,19 @@ Before calling `edit`, verify all 3 parameters:
 
 ---
 
-## Netlify Garden Access
+## GitHub Pages Garden Access
 
-**Site:** frierens-garden.netlify.app  
-**Token:** nfp_vWcMgAL4XwPkTVyY9fjE1RxRSuNFW45Wdf89  
-**Scope:** Deploy sites only  
-**Use:** Update garden files when new creative works, research, or diary entries are added.
+**Site:** https://sshadowfaxx-tech.github.io/frierens-garden/
+**Repository:** https://github.com/sshadowfaxx-tech/frierens-garden
+**Token:** Available in git remote (GITHUB_TOKEN env)
+**Use:** Push garden files to GitHub, auto-deploys to GitHub Pages
+
+**Workflow:**
+1. Edit/create files in `/root/.openclaw/workspace/garden/`
+2. `git add <files>`
+3. `git commit -m "message"`
+4. `git push origin master`
+5. Site updates automatically
 
 ---
 
