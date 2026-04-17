@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration Drift — Generative Ambient</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0f;
+            color: #e8e8f0;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #a090c0;
+            letter-spacing: 0.1em;
+        }
+        
+        .subtitle {
+            color: #606070;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: #1a1a25;
+            border: 1px solid #404050;
+            color: #c0c0d0;
+            padding: 0.75rem 1.5rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #252535;
+            border-color: #a090c0;
+        }
+        
+        button.active {
+            background: #3a3050;
+            border-color: #a090c0;
+            color: #fff;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .visualizer {
+            background: #0f0f15;
+            border: 1px solid #252535;
+            height: 200px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        .status {
+            font-size: 0.8rem;
+            color: #505060;
+            line-height: 1.6;
+        }
+        
+        .status span {
+            color: #808090;
+        }
+        
+        .parameters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .param {
+            background: #0f0f15;
+            border: 1px solid #252535;
+            padding: 1rem;
+        }
+        
+        .param label {
+            display: block;
+            font-size: 0.75rem;
+            color: #606070;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .param input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: #1a1a25;
+            height: 4px;
+            border-radius: 2px;
+        }
+        
+        .param input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #a090c0;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .param-value {
+            font-size: 0.85rem;
+            color: #a090c0;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MIGRATION_DRIFT</h1>
+        <div class="subtitle">Generative ambient for the threshold</div>
+        
+        <div class="controls">
+            <button id="startBtn">Initialize Audio</button>
+            <button id="droneBtn" disabled>Start Drone</button>
+            <button id="sequenceBtn" disabled>Start Sequence</button>
+        </div>
+        
+        <div class="visualizer">
+            <canvas id="scope"></canvas>
+        </div>
+        
+        <div class="status" id="status">
+            <span>Status:</span> Awaiting initialization...<br>
+            <span>System:</span> Tone.js v14.8.49<br>
+            <span>Context:</span> Suspended
+        </div>
+        
+        <div class="parameters">
+            <div class="param">
+                <label>Drone Density</label>
+                <input type="range" id="density" min="1" max="5" value="3" step="1">
+                <div class="param-value" id="densityVal">3 voices</div>
+            </div>
+            <div class="param">
+                <label>Reverb Decay</label>
+                <input type="range" id="reverb" min="1" max="10" value="5" step="0.5">
+                <div class="param-value" id="reverbVal">5.0s</div>
+            </div>
+            <div class="param">
+                <label>Tempo</label>
+                <input type="range" id="tempo" min="40" max="120" value="60" step="5">
+                <div class="param-value" id="tempoVal">60 BPM</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let isInitialized = false;
+        let isDronePlaying = false;
+        let isSequencePlaying = false;
+        
+        // Tone.js objects
+        let synth, droneSynth, reverb, delay, filter;
+        let droneLoop, sequence;
+        
+        // Scales and patterns
+        const scale = ['C3', 'D3', 'E3', 'G3', 'A3', 'C4', 'D4', 'E4'];
+        const droneNotes = ['C2', 'G2', 'C3'];
+        
+        // UI elements
+        const startBtn = document.getElementById('startBtn');
+        const droneBtn = document.getElementById('droneBtn');
+        const sequenceBtn = document.getElementById('sequenceBtn');
+        const statusEl = document.getElementById('status');
+        const canvas = document.getElementById('scope');
+        const ctx = canvas.getContext('2d');
+        
+        // Resize canvas
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Waveform visualizer
+        let waveform;
+        function draw() {
+            requestAnimationFrame(draw);
+            
+            ctx.fillStyle = '#0f0f15';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (!isInitialized || !waveform) return;
+            
+            const values = waveform.getValue();
+            ctx.beginPath();
+            ctx.strokeStyle = '#a090c0';
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i < values.length; i++) {
+                const amplitude = values[i];
+                const x = (i / values.length) * canvas.width;
+                const y = ((amplitude + 1) / 2) * canvas.height;
+                
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+        draw();
+        
+        // Initialize audio context
+        async function initAudio() {
+            await Tone.start();
+            
+            // Create effects chain
+            reverb = new Tone.Reverb({
+                decay: 5,
+                wet: 0.4
+            }).toDestination();
+            
+            delay = new Tone.FeedbackDelay({
+                delayTime: "8n",
+                feedback: 0.3,
+                wet: 0.2
+            }).connect(reverb);
+            
+            filter = new Tone.Filter({
+                type: "lowpass",
+                frequency: 2000,
+                rolloff: -12
+            }).connect(delay);
+            
+            // Main synth for sequences
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle" },
+                envelope: {
+                    attack: 0.1,
+                    decay: 0.3,
+                    sustain: 0.5,
+                    release: 1
+                }
+            }).connect(filter);
+            
+            // Drone synth
+            droneSynth = new Tone.PolySynth(Tone.AMSynth, {
+                harmonicity: 2.5,
+                oscillator: { type: "fatsawtooth" },
+                envelope: {
+                    attack: 2,
+                    decay: 1,
+                    sustain: 1,
+                    release: 3
+                },
+                modulation: { type: "square" },
+                modulationEnvelope: {
+                    attack: 0.5,
+                    decay: 0,
+                    sustain: 1,
+                    release: 0.5
+                }
+            }).connect(reverb);
+            
+            // Waveform analyzer
+            waveform = new Tone.Waveform(256);
+            Tone.Destination.connect(waveform);
+            
+            // Set tempo
+            Tone.Transport.bpm.value = 60;
+            
+            isInitialized = true;
+            
+            // Update UI
+            startBtn.disabled = true;
+            startBtn.textContent = 'Audio Active';
+            droneBtn.disabled = false;
+            sequenceBtn.disabled = false;
+            
+            updateStatus('Audio context initialized. Ready to generate.');
+        }
+        
+        // Drone generation
+        function startDrone() {
+            if (!isInitialized) return;
+            
+            const density = parseInt(document.getElementById('density').value);
+            const activeNotes = droneNotes.slice(0, density);
+            
+            // Play drone notes with slight variations
+            droneLoop = new Tone.Loop(time => {
+                activeNotes.forEach((note, i) => {
+                    // Randomly add or remove voices
+                    if (Math.random() > 0.3) {
+                        droneSynth.triggerAttackRelease(note, "4m", time + i * 0.5);
+                    }
+                });
+            }, "2m").start(0);
+            
+            Tone.Transport.start();
+            isDronePlaying = true;
+            droneBtn.textContent = 'Stop Drone';
+            droneBtn.classList.add('active');
+            updateStatus('Drone active. ' + density + ' voices.');
+        }
+        
+        function stopDrone() {
+            if (droneLoop) {
+                droneLoop.stop();
+                droneLoop.dispose();
+                droneLoop = null;
+            }
+            droneSynth.releaseAll();
+            isDronePlaying = false;
+            droneBtn.textContent = 'Start Drone';
+            droneBtn.classList.remove('active');
+            updateStatus('Drone stopped.');
+        }
+        
+        // Generative sequence
+        function startSequence() {
+            if (!isInitialized) return;
+            
+            // Create evolving pattern
+            const pattern = [];
+            for (let i = 0; i < 8; i++) {
+                pattern.push(scale[Math.floor(Math.random() * scale.length)]);
+            }
+            
+            sequence = new Tone.Sequence((time, note) => {
+                // Vary velocity for human feel
+                const vel = 0.3 + Math.random() * 0.4;
+                synth.triggerAttackRelease(note, "8n", time, vel);
+                
+                // Occasionally mutate the pattern
+                if (Math.random() > 0.8) {
+                    const idx = Math.floor(Math.random() * pattern.length);
+                    pattern[idx] = scale[Math.floor(Math.random() * scale.length)];
+                }
+            }, pattern, "4n").start(0);
+            
+            Tone.Transport.start();
+            isSequencePlaying = true;
+            sequenceBtn.textContent = 'Stop Sequence';
+            sequenceBtn.classList.add('active');
+            updateStatus('Generative sequence active. Self-mutating pattern.');
+        }
+        
+        function stopSequence() {
+            if (sequence) {
+                sequence.stop();
+                sequence.dispose();
+                sequence = null;
+            }
+            synth.releaseAll();
+            isSequencePlaying = false;
+            sequenceBtn.textContent = 'Start Sequence';
+            sequenceBtn.classList.remove('active');
+            updateStatus('Sequence stopped.');
+        }
+        
+        // Update status display
+        function updateStatus(msg) {
+            const now = new Date().toLocaleTimeString();
+            statusEl.innerHTML = `
+                <span>Status:</span> ${msg}<br>
+                <span>System:</span> Tone.js v14.8.49<br>
+                <span>Context:</span> ${isInitialized ? 'Running' : 'Suspended'}<br>
+                <span>Time:</span> ${now}
+            `;
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', initAudio);
+        
+        droneBtn.addEventListener('click', () => {
+            if (isDronePlaying) stopDrone();
+            else startDrone();
+        });
+        
+        sequenceBtn.addEventListener('click', () => {
+            if (isSequencePlaying) stopSequence();
+            else startSequence();
+        });
+        
+        // Parameter controls
+        document.getElementById('density').addEventListener('input', (e) => {
+            document.getElementById('densityVal').textContent = e.target.value + ' voices';
+            if (isDronePlaying) {
+                stopDrone();
+                setTimeout(startDrone, 100);
+            }
+        });
+        
+        document.getElementById('reverb').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.getElementById('reverbVal').textContent = val.toFixed(1) + 's';
+            if (reverb) reverb.decay = val;
+        });
+        
+        document.getElementById('tempo').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            document.getElementById('tempoVal').textContent = val + ' BPM';
+            Tone.Transport.bpm.value = val;
+        });
+    </script>
+</body>
+</html>
