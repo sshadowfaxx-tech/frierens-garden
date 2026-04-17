@@ -1,0 +1,9 @@
+*.py
+*.pyc
+__pycache__/
+.netlify/
+*.log
+*.md
+!README.md
+.env
+.DS_Store
