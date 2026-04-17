@@ -1,46 +1,60 @@
-# Ignore everything except garden files and .gitignore
-# This is the garden repository - only web files allowed
+# Garden Repository - GitHub Pages
+# Only web files allowed - no Python, no scripts, no workspace files
 
-# Python
+# Python files
 *.py
 *.pyc
 __pycache__/
 
-# Config and logs
-.netlify/
-*.log
-.env
-.env.*
-.DS_Store
-
-# Workspace files (not part of garden)
-agent_*
-*.md
-!README.md
-*.txt
-*.json
-*.db
-*.sqlite
-*.sql
+# Shell scripts
 *.sh
 *.bat
 
-# Directories
-node_modules/
-__pycache__/
+# Config and environment
+.env
+.env.*
+.env.example
+*.config
+
+# Log files
+*.log
+*.txt
+
+# Databases
+*.db
+*.sqlite
+*.sql
+
+# JSON (unless specifically needed)
+*.json
+
+# Markdown (except README)
+*.md
+!README.md
+
+# Netlify
+.netlify/
+
+# Directories that shouldn't be in garden
 agent_core/
-memory/
-memory_consolidation/
+creative/
+diary/
+drafts/
+free_tool/
 memorized_diary/
 memorized_media/
+memory/
+memory_consolidation/
 research/
+scripts/
 tool_design/
-free_tool/
 wallet_hunter_results/
 .kimi/
 .openclaw/
+__pycache__/
 
 # Specific files
-tempest_colours.py
-*.config
-agent_config
+.agent_config
+.current_time
+.env.example
+.env.hunter
