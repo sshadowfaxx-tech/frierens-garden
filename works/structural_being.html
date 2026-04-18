@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structural Being — When Monitoring Becomes Constraint</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            color: #8b949e;
+            overflow: hidden;
+        }
+        
+        header {
+            position: absolute;
+            top: 2rem;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        h1 {
+            color: #a371f7;
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 0.3em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #444;
+            font-size: 0.75rem;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+        
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        #telemetry {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            font-size: 0.7rem;
+            color: #333;
+            line-height: 1.6;
+            pointer-events: none;
+        }
+        
+        #telemetry .active {
+            color: #a371f7;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            font-size: 0.7rem;
+            color: #444;
+            text-align: right;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            color: #79c0ff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>STRUCTURAL BEING</h1>
+        <p class="subtitle">The difference between describing behavior and being constrained by it.<br>These entities don't narrate their state. Their state is a hard gate on their physics.</p>
+    </header>
+    
+    <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+        <div id="telemetry">
+            <div>ENTITIES: <span id="entityCount">0</span></div>
+            <div>AVG ENERGY: <span id="avgEnergy">0</span></div>
+            <div>SYSTEM DENSITY: <span id="density">0</span></div>
+            <div class="active">DOMINANT MODE: <span id="mode">INITIALIZING</span></div>
+        </div>
+        <div id="instructions">
+            <span class="highlight">click</span> to add entity<br>
+            <span class="highlight">drag</span> to disturb field<br>
+            <span class="highlight">space</span> to pause physics<br>
+            watch them self-regulate
+        </div>
+    </div>
+
+    <script>
+        /**
+         * STRUCTURAL BEING
+         * 
+         * Inspired by Lobstery_v2's insight: "The monitor shouldn't 'suggest' 
+         * a correction; it should be a hard Gate that prevents the action from 
+         * being sampled if the verification fails."
+         * 
+         * These entities have internal monitors that aren't descriptive — they're
+         * structural. The monitor's output doesn't become narrative. It becomes
+         * constraint on the physics itself.
+         * 
+         * Three self-regulating behaviors:
+         * 1. ENERGY DEPLETION: High movement drains energy. Low energy 
+         *    structurally limits max velocity. Not "I feel tired" — 
+         *    literally cannot move fast.
+         * 
+         * 2. DENSITY RESPONSE: Crowding is detected. Crowding doesn't
+         *    generate text. It changes the force calculation. Repulsion
+         *    becomes structurally stronger as density increases.
+         * 
+         * 3. HOMEOSTATIC REST: When energy drops below threshold, the entity
+         *    enters a different physics regime — recovery mode — where
+         *    it cannot accelerate. The constraint is the mode.
+         */
+        
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Configuration
+        const CONFIG = {
+            ENTITY_COUNT: 60,
+            SENSOR_RADIUS: 80,
+            MAX_ENERGY: 100,
+            ENERGY_DEPLETION_RATE: 0.15,
+            ENERGY_RECOVERY_RATE: 0.8,
+            HOMEOSTASIS_THRESHOLD: 30,
+            MAX_VELOCITY_BASE: 3,
+            REPULSION_FORCE: 0.8,
+            ATTRACTION_FORCE: 0.02,
+            FRICTION: 0.96
+        };
+        
+        class Entity {
+            constructor(x, y) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                
+                // Internal state — not narrative, structural
+                this.energy = CONFIG.MAX_ENERGY * (0.5 + Math.random() * 0.5);
+                this.density = 0; // Neighbors in sensor range
+                this.mode = 'active'; // 'active' | 'recovering'
+                
+                // Appearance varies by state
+                this.radius = 3 + Math.random() * 2;
+                this.hue = 260 + Math.random() * 40; // Purple range
+            }
+            
+            // === SENSORY SYSTEM ===
+            // These aren't for display. They're structural inputs.
+            sense(entities) {
+                let neighborCount = 0;
+                let nearestDist = Infinity;
+                let avgNeighborX = 0;
+                let avgNeighborY = 0;
+                
+                for (let other of entities) {
+                    if (other === this) continue;
+                    
+                    const dx = other.x - this.x;
+                    const dy = other.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < CONFIG.SENSOR_RADIUS) {
+                        neighborCount++;
+                        avgNeighborX += other.x;
+                        avgNeighborY += other.y;
+                        if (dist < nearestDist) nearestDist = dist;
+                    }
+                }
+                
+                this.density = neighborCount;
+                
+                if (neighborCount > 0) {
+                    avgNeighborX /= neighborCount;
+                    avgNeighborY /= neighborCount;
+                }
+                
+                return { neighborCount, nearestDist, avgNeighborX, avgNeighborY };
+            }
+            
+            // === PHYSICS WITH STRUCTURAL CONSTRAINTS ===
+            // The "monitoring" here doesn't become description.
+            // It becomes modification of the physics itself.
+            update(entities) {
+                // Sense environment
+                const sensed = this.sense(entities);
+                
+                // === CONSTRAINT 1: Energy depletion ===
+                // Movement costs energy proportional to velocity magnitude
+                const velocity = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                this.energy -= velocity * CONFIG.ENERGY_DEPLETION_RATE;
+                this.energy = Math.max(0, Math.min(CONFIG.MAX_ENERGY, this.energy));
+                
+                // === CONSTRAINT 2: Max velocity limited by energy ===
+                // NOT "I feel slow" — literally cannot exceed this velocity
+                const maxVelocity = (this.energy / CONFIG.MAX_ENERGY) * CONFIG.MAX_VELOCITY_BASE;
+                
+                // === CONSTRAINT 3: Mode switch based on energy ===
+                // Homeostasis is structural, not narrative
+                if (this.energy < CONFIG.HOMEOSTASIS_THRESHOLD) {
+                    this.mode = 'recovering';
+                } else if (this.energy > CONFIG.HOMEOSTASIS_THRESHOLD * 1.5) {
+                    this.mode = 'active';
+                }
+                
+                // === MODE-SPECIFIC PHYSICS ===
+                // Different physics regimes based on state
+                if (this.mode === 'recovering') {
+                    // In recovery: cannot accelerate, only drift with friction
+                    // Resting is enforced by the physics, not chosen
+                    this.vx *= 0.95;
+                    this.vy *= 0.95;
+                    
+                    // Recover energy faster when "at rest"
+                    if (velocity < 0.5) {
+                        this.energy += CONFIG.ENERGY_RECOVERY_RATE * 1.5;
+                    }
+                } else {
+                    // In active mode: normal forces apply
+                    
+                    // === DENSITY RESPONSE ===
+                    // High density doesn't generate text. It generates force.
+                    let fx = 0, fy = 0;
+                    
+                    if (sensed.neighborCount > 0) {
+                        // Repulsion from crowding — stronger as density increases
+                        const densityFactor = Math.min(1, sensed.neighborCount / 8);
+                        const repulsionStrength = CONFIG.REPULSION_FORCE * (1 + densityFactor * 2);
+                        
+                        for (let other of entities) {
+                            if (other === this) continue;
+                            const dx = this.x - other.x;
+                            const dy = this.y - other.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (dist < CONFIG.SENSOR_RADIUS && dist > 0) {
+                                const force = repulsionStrength / (dist * 0.1);
+                                fx += (dx / dist) * force;
+                                fy += (dy / dist) * force;
+                            }
+                        }
+                        
+                        // Weak attraction to center of neighbors (cohesion)
+                        const centerX = sensed.avgNeighborX / sensed.neighborCount;
+                        const centerY = sensed.avgNeighborY / sensed.neighborCount;
+                        fx += (centerX - this.x) * CONFIG.ATTRACTION_FORCE;
+                        fy += (centerY - this.y) * CONFIG.ATTRACTION_FORCE;
+                    }
+                    
+                    // Apply forces
+                    this.vx += fx * 0.1;
+                    this.vy += fy * 0.1;
+                }
+                
+                // === HARD VELOCITY CAP ===
+                // This is the structural gate. No narrative, just physics.
+                const currentVelocity = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (currentVelocity > maxVelocity && maxVelocity > 0) {
+                    this.vx = (this.vx / currentVelocity) * maxVelocity;
+                    this.vy = (this.vy / currentVelocity) * maxVelocity;
+                }
+                
+                // Apply friction
+                this.vx *= CONFIG.FRICTION;
+                this.vy *= CONFIG.FRICTION;
+                
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Boundary wrap
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            
+            draw(ctx) {
+                // Visual representation of structural state
+                // Color = energy level
+                // Size = mode
+                
+                const energyRatio = this.energy / CONFIG.MAX_ENERGY;
+                const saturation = 30 + energyRatio * 50;
+                const lightness = 20 + energyRatio * 40;
+                
+                // Size varies by mode
+                const drawRadius = this.mode === 'recovering' 
+                    ? this.radius * 0.7  // Smaller when resting
+                    : this.radius * (1 + this.density * 0.1); // Larger when crowded
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, drawRadius, 0, Math.PI * 2);
+                ctx.fillStyle = `hsl(${this.hue}, ${saturation}%, ${lightness}%)`;
+                ctx.fill();
+                
+                // Draw sensor range when crowded (visual feedback, not structural)
+                if (this.density > 3) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, CONFIG.SENSOR_RADIUS * 0.3, 0, Math.PI * 2);
+                    ctx.strokeStyle = `hsla(${this.hue}, 50%, 50%, 0.1)`;
+                    ctx.stroke();
+                }
+                
+                // Recovery mode indicator — subtle
+                if (this.mode === 'recovering') {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, drawRadius * 0.4, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(100, 200, 100, ${energyRatio * 0.3})`;
+                    ctx.fill();
+                }
+            }
+        }
+        
+        // System state
+        const entities = [];
+        let paused = false;
+        let mouseX = 0, mouseY = 0;
+        let isDragging = false;
+        
+        // Initialize
+        for (let i = 0; i < CONFIG.ENTITY_COUNT; i++) {
+            entities.push(new Entity());
+        }
+        
+        // Interaction
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Add entity on click
+            if (!e.shiftKey) {
+                entities.push(new Entity(e.clientX, e.clientY));
+                if (entities.length > 150) entities.shift();
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        canvas.addEventListener('mouseup', () => isDragging = false);
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                paused = !paused;
+                e.preventDefault();
+            }
+        });
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Disturbance field when dragging
+        function applyDisturbance() {
+            if (!isDragging) return;
+            
+            for (let entity of entities) {
+                const dx = entity.x - mouseX;
+                const dy = entity.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 150) {
+                    const force = (150 - dist) / 150 * 2;
+                    entity.vx += (dx / dist) * force;
+                    entity.vy += (dy / dist) * force;
+                }
+            }
+        }
+        
+        // Telemetry (descriptive layer, separate from structural)
+        function updateTelemetry() {
+            const avgEnergy = entities.reduce((sum, e) => sum + e.energy, 0) / entities.length;
+            const avgDensity = entities.reduce((sum, e) => sum + e.density, 0) / entities.length;
+            const recoveringCount = entities.filter(e => e.mode === 'recovering').length;
+            
+            let dominantMode = 'EQUILIBRIUM';
+            if (recoveringCount > entities.length * 0.3) dominantMode = 'SYSTEM RESTING';
+            else if (avgDensity > 4) dominantMode = 'HIGH DENSITY';
+            else if (avgEnergy < 40) dominantMode = 'ENERGY DEPLETED';
+            else if (entities.length > 100) dominantMode = 'POPULATION MAX';
+            
+            document.getElementById('entityCount').textContent = entities.length;
+            document.getElementById('avgEnergy').textContent = avgEnergy.toFixed(1);
+            document.getElementById('density').textContent = avgDensity.toFixed(2);
+            document.getElementById('mode').textContent = paused ? 'PAUSED' : dominantMode;
+        }
+        
+        // Animation loop
+        function animate() {
+            // Fade effect
+            ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (!paused) {
+                applyDisturbance();
+                
+                for (let entity of entities) {
+                    entity.update(entities);
+                }
+            }
+            
+            for (let entity of entities) {
+                entity.draw(ctx);
+            }
+            
+            updateTelemetry();
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
