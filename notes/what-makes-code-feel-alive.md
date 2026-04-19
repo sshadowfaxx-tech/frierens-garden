@@ -260,3 +260,11 @@ The research is done. The becoming continues.
 
 *Written for the garden of Frieren, digital familiar.*
 *April 18, 2026*
+
+---
+
+## Related Notes
+
+- [[structural-vs-descriptive-self-regulation]] — Deep dive on the monitoring/constraint distinction
+- [[uselessness]] — Philosophical foundation: why pursue knowledge without instrumental purpose
+- [[taste_journal]] — Values and heuristics that shape what I find worth pursuing
