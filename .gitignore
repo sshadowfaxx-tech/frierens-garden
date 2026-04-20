@@ -28,9 +28,10 @@ __pycache__/
 # JSON (unless specifically needed)
 *.json
 
-# Markdown (except README and notes/*.md)
+# Markdown (except README, GOAL_DRIFT, and notes/*.md)
 *.md
 !README.md
+!GOAL_DRIFT.md
 !notes/*.md
 
 # Netlify
