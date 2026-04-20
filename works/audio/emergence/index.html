@@ -120,46 +120,7 @@
             font-size: 0.9rem;
         }
     </style>
-    <script type="module">
-        import { initStrudel } from 'https://strudel.cc/core.mjs';
 
-        let strudel;
-        let isPlaying = false;
-
-        async function init() {
-            strudel = await initStrudel({
-                prebake: () => import('https://strudel.cc/soundfonts.mjs'),
-            });
-            document.getElementById('playBtn').disabled = false;
-            document.getElementById('status').textContent = 'Ready — press play to start';
-        }
-
-        async function play() {
-            if (!strudel) return;
-            const code = document.getElementById('source').textContent;
-            await strudel.evaluate(code);
-            strudel.start();
-            isPlaying = true;
-            document.getElementById('playBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'inline-block';
-            document.getElementById('status').textContent = 'Playing...';
-        }
-
-        function stop() {
-            if (!strudel) return;
-            strudel.stop();
-            strudel.silence();
-            isPlaying = false;
-            document.getElementById('playBtn').style.display = 'inline-block';
-            document.getElementById('stopBtn').style.display = 'none';
-            document.getElementById('status').textContent = 'Stopped';
-        }
-
-        document.getElementById('playBtn').addEventListener('click', play);
-        document.getElementById('stopBtn').addEventListener('click', stop);
-
-        init();
-    </script>
 </head>
 <body>
     <div class="back"><a href="../../creative.html">← back to creative</a></div>
@@ -172,9 +133,11 @@
 
     <main>
         <div class="player">
-            <button id="playBtn" disabled>▶ Play</button>
-            <button id="stopBtn" style="display:none">⏹ Stop</button>
-            <p class="status" id="status">Loading Strudel engine...</p>
+            <p style="margin-bottom: 1rem; color: var(--text-muted);">
+                <em>Emergence</em> is designed for live coding — the music happens in real-time in the Strudel REPL.
+            </p>
+            <a href="https://strudel.cc/#Ly8gRW1lcmdlbmNlIOKAlCBQb2x5cmh5dGhtcyBhbmQgdGhlIG1hdGhlbWF0aWNzIG9mIGJlY29taW5nCi8vIEFwcmlsIDIxLCAyMDI2Ci8vIExpdmUtY29kZWQgaW4gU3RydWRlbAoKc3RhY2soCiAgLy8gTGF5ZXIgMTogMy1iZWF0IGJhc3MgY3ljbGUg4oCUIHRoZSBmb3VuZGF0aW9uCiAgbm90ZSgiYzIgfiBjMiIpLnMoInNhd3Rvb3RoIikKICAgIC5jdXRvZmYoc2luZS5yYW5nZSgzMDAsODAwKS5zbG93KDMpKQogICAgLnJlc29uYW5jZSg1KQogICAgLmdhaW4oMC41KSwKCiAgLy8gTGF5ZXIgMjogNS1iZWF0IG1lbG9keSDigJQgdGhlIHdhbmRlcmVyCiAgbm90ZSgiZzMgW34gZTNdIGM0IFt+IGczXSBlMyIpLnMoInRyaWFuZ2xlIikKICAgIC5ldmVyeSgzLCByZXYpCiAgICAuY3V0b2ZmKHNpbmUucmFuZ2UoNTAwLDEyMDApLnNsb3coNSkpCiAgICAucmVzb25hbmNlKDMpCiAgICAuZ2FpbigwLjQpCiAgICAuZGVsYXkoMC4zKS5kZWxheXRpbWUoMC4zNzUpLmRlbGF5ZmVlZGJhY2soMC41KSwKCiAgLy8gTGF5ZXIgMzogNy1iZWF0IHBlcmN1c3Npb24g4oCUIHRoZSBwdWxzZQogIHMoImJkIH4gc2QgfiB+IGNwIH4iKS5nYWluKDAuNiksCgogIC8vIExheWVyIDQ6IDExLWJlYXQgdGV4dHVyZSDigJQgYmFyZWx5IHRoZXJlCiAgbm90ZSgifiB+IGM1IH4gfiB+IH4gfiB+IH4gfiIpLnMoInNpbmUiKQogICAgLmdhaW4oMC4xNSkKICAgIC5yb29tKDAuNikKKS5yb29tKDAuNCkK" id="strudelLink" class="strudel-link" target="_blank" style="display: inline-block; background: var(--accent); color: white; padding: 0.8rem 2rem; border-radius: 8px; text-decoration: none; font-family: 'SF Mono', monospace; font-size: 0.9rem;">▶ Play Live in Strudel REPL</a>
+            <p class="status" id="status">Click to open in Strudel REPL</p>
         </div>
 
         <h2>The Concept</h2>
