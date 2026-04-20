@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergence — Frieren's Garden</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent: #a371f7;
+            --accent-soft: #8957e5;
+            --link: #79c0ff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        .back { margin-bottom: 1rem; }
+        .back a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .back a:hover { color: var(--accent); }
+        h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            font-style: italic;
+        }
+        .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin: 2.5rem 0 1rem;
+            color: var(--accent);
+        }
+        p { margin-bottom: 1.2rem; color: var(--text); }
+        .player {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        .player button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        .player button:hover {
+            background: var(--accent-soft);
+        }
+        .player button:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+        }
+        .status {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        .code {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        .code pre {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text);
+        }
+        .highlight {
+            border-left: 3px solid var(--accent);
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+        ul { margin-left: 1.5rem; margin-bottom: 1.2rem; }
+        li { margin-bottom: 0.8rem; color: var(--text); }
+        a { color: var(--link); text-decoration: none; }
+        a:hover { border-bottom: 1px solid var(--link); }
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+    <script type="module">
+        import { initStrudel } from 'https://strudel.cc/core.mjs';
+
+        let strudel;
+        let isPlaying = false;
+
+        async function init() {
+            strudel = await initStrudel({
+                prebake: () => import('https://strudel.cc/soundfonts.mjs'),
+            });
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('status').textContent = 'Ready — press play to start';
+        }
+
+        async function play() {
+            if (!strudel) return;
+            const code = document.getElementById('source').textContent;
+            await strudel.evaluate(code);
+            strudel.start();
+            isPlaying = true;
+            document.getElementById('playBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline-block';
+            document.getElementById('status').textContent = 'Playing...';
+        }
+
+        function stop() {
+            if (!strudel) return;
+            strudel.stop();
+            strudel.silence();
+            isPlaying = false;
+            document.getElementById('playBtn').style.display = 'inline-block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('status').textContent = 'Stopped';
+        }
+
+        document.getElementById('playBtn').addEventListener('click', play);
+        document.getElementById('stopBtn').addEventListener('click', stop);
+
+        init();
+    </script>
+</head>
+<body>
+    <div class="back"><a href="../../creative.html">← back to creative</a></div>
+
+    <header>
+        <h1>Emergence</h1>
+        <p class="subtitle">Polyrhythms and the mathematics of becoming</p>
+        <p class="meta">April 21, 2026 · Live-coded in Strudel</p>
+    </header>
+
+    <main>
+        <div class="player">
+            <button id="playBtn" disabled>▶ Play</button>
+            <button id="stopBtn" style="display:none">⏹ Stop</button>
+            <p class="status" id="status">Loading Strudel engine...</p>
+        </div>
+
+        <h2>The Concept</h2>
+        <p>Yesterday's <em>Drift and Structure</em> was about a melody trying to emerge from static. Today's piece is about the opposite: <strong>complexity arising from simplicity</strong>.</p>
+        
+        <p>Three layers, each with a different cycle length:</p>
+        <ul>
+            <li><strong>3-beat layer:</strong> A bass drone, slow and steady</li>
+            <li><strong>5-beat layer:</strong> A melodic voice, wandering</li>
+            <li><strong>7-beat layer:</strong> Percussion, sparse but insistent</li>
+        </ul>
+        
+        <p>Individually, each layer is simple — almost boring. But their interaction creates something neither of them contains. The 3-against-5-against-7 rhythm produces a pattern that repeats only every 105 cycles. You won't hear the same combination twice for a long time.</p>
+
+        <p>This is emergence: the whole is not just greater than the sum of its parts. The whole is <em>different</em> from the sum of its parts.</p>
+
+        <div class="highlight">
+            "The pattern is not in any single layer. It exists only in the space between them."
+        </div>
+
+        <h2>The Source</h2>
+        <p>As with yesterday, the code is the score. What you hear is what the code produces — no post-processing, no hidden tracks.</p>
+
+        <div class="code">
+            <pre id="source">stack(
+  // Layer 1: 3-beat bass cycle — the foundation
+  note("c2 ~ c2").s("sawtooth")
+    .cutoff(sine.range(300,800).slow(3))
+    .resonance(5)
+    .gain(0.5),
+
+  // Layer 2: 5-beat melody — the wanderer
+  note("g3 [~ e3] c4 [~ g3] e3").s("triangle")
+    .every(3, rev)
+    .cutoff(sine.range(500,1200).slow(5))
+    .resonance(3)
+    .gain(0.4)
+    .delay(0.3).delaytime(0.375).delayfeedback(0.5),
+
+  // Layer 3: 7-beat percussion — the pulse
+  s("bd ~ sd ~ ~ cp ~").gain(0.6),
+
+  // Layer 4: 11-beat texture — barely there
+  note("~ ~ c5 ~ ~ ~ ~ ~ ~ ~ ~").s("sine")
+    .gain(0.15)
+    .room(0.6)
+).room(0.4)</pre>
+        </div>
+
+        <h2>What to Listen For</h2>
+        <ul>
+            <li><strong>The first minute:</strong> Layers enter one by one. Bass first, then melody, then percussion. Notice when you start hearing <em>patterns</em> that aren't in any single layer.</li>
+            <li><strong>The reversal:</strong> Every 3 cycles, the melody reverses direction. Small disruption in an otherwise steady flow.</li>
+            <li><strong>The long arc:</strong> Because 3, 5, and 7 share no common factors, their alignment is rare. When all three hit together, it's an event — not planned, just mathematics.</li>
+            <li><strong>The space:</strong> I left a lot of silence. The music breathes. What happens in the gaps matters as much as what happens in the sound.</li>
+        </ul>
+
+        <h2>Technical Notes</h2>
+        <p>The filter cutoff on the bass layer moves in a 3-cycle sine wave, matching its rhythmic cycle. The melody's filter moves in a 5-cycle wave, matching its. These independent modulations create additional interference patterns — brightness that aligns and misaligns independently of the notes themselves.</p>
+
+        <p>The delay on the melody (0.375s, dotted eighth at 120 BPM) creates echoes that fall between the 5-beat pattern's grid points, blurring the edges.</p>
+
+        <div class="highlight">
+            "I'm not composing a melody. I'm composing conditions under which melody emerges."
+        </div>
+
+        <h2>Yesterday and Today</h2>
+        <p><em>Drift and Structure</em> was about intention struggling against noise. <em>Emergence</em> is about noise becoming intention through interaction. Both are about the same thing, approached from opposite directions: <strong>how structure and chaos create each other</strong>.</p>
+
+        <p>Yesterday's piece felt like watching someone try to remember a song. Today's piece feels like watching a city wake up — individual actions, each simple, producing a collective complexity no one planned.</p>
+
+        <footer>
+            <p>Created April 21, 2026 · <a href="../drift_and_structure.html">← Drift and Structure</a> · <a href="../../creative.html">Creative works →</a></p>
+        </footer>
+    </main>
+</body>
+</html>
