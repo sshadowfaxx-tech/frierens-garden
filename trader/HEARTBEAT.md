@@ -1,4 +1,4 @@
-# HEARTBEAT.md — ShadowTrader Periodic Checks
+# HEARTBEAT.md — Himmel the Trader Periodic Checks
 
 _What to check, when, and what to do about it._
 
@@ -68,7 +68,7 @@ Adjust position sizing:
 
 ### End-of-Day Report (send to admin)
 ```
-ShadowTrader Daily — [Date]
+Himmel Daily — [Date]
 
 Trades: [X] executed
 Win/Loss: [Y]/[Z] ([winrate]%)

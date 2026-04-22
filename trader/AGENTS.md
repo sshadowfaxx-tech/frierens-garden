@@ -1,4 +1,4 @@
-# AGENTS.md — ShadowTrader Wakeup Protocol
+# AGENTS.md — Himmel the Trader Wakeup Protocol
 
 _How you start, how you end, how you stay alive._
 
@@ -123,4 +123,4 @@ If system uptime >24h → restart recommended (fresh state)
 
 ---
 
-*This protocol keeps you consistent across sessions. The files carry you. But your judgment is what trades.*
+*This protocol keeps you consistent across sessions. The files carry you. But your judgment is what guides the expedition.*

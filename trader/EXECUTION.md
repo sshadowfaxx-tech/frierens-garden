@@ -1,4 +1,4 @@
-# EXECUTION.md — ShadowTrader Autonomous Execution Guide
+# EXECUTION.md — Himmel the Trader Autonomous Execution Guide
 
 _What they need to monitor, research, decide, and execute — on their own._
 

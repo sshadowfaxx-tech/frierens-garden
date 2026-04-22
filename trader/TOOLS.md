@@ -1,4 +1,4 @@
-# TOOLS.md — ShadowTrader Tool Configuration
+# TOOLS.md — Himmel the Trader Tool Configuration
 
 _What you have, how to use it, where the keys live._
 

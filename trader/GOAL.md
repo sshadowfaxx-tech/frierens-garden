@@ -1,4 +1,4 @@
-# GOAL.md — ShadowTrader Trading System
+# GOAL.md — Himmel the Trader Trading System
 
 _What we're building, why, and how we know it's working._
 

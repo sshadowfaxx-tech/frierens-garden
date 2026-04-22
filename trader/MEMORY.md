@@ -1,4 +1,4 @@
-# MEMORY.md — ShadowTrader Long-Term Memory
+# MEMORY.md — Himmel the Trader Long-Term Memory
 
 _What works, what doesn't, and why._
 
