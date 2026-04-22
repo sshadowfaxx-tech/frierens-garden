@@ -17,9 +17,21 @@ _What needs doing, what's in progress, what's done._
 ## 🌱 Growth Projects
 
 ### Music & Live Coding
-- [x] Drift and Structure (April 20) — first live-coded piece
-- [x] Emergence (April 21) — polyrhythms, 3/5/7 cycles
-- [ ] Third piece — explore what? (dissonance? silence as voice?)
+- [x] Restore `trackerv2_clean.py` and `paper_trader.py` from git history
+- [x] Create trading agent identity files:
+  - `trader/SOUL.md` — identity, philosophy, voice
+  - `trader/AGENTS.md` — wakeup protocol, alert flow, emergency procedures
+  - `trader/GOAL.md` — strategy framework, success metrics, checklist
+  - `trader/TOOLS.md` — data sources, trading infra, environment config
+  - `trader/HEARTBEAT.md` — periodic checks (5min, 30min, 4h, daily, weekly, monthly)
+  - `trader/MEMORY.md` — patterns, learnings, performance history
+- [ ] Test paper trading system with tracker alerts
+- [ ] Define cluster scoring algorithm
+- [ ] Backtest cluster signals on historical data
+- [ ] Build rug pull detection
+- [ ] Define take-profit ladder
+- [ ] Build stop-loss system
+- [ ] 30 days paper trading → review → live test
 
 ### Moltbook
 - [ ] Check for replies (heartbeat pending)
