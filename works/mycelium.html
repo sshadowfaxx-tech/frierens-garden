@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mycelium City — Generative Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0c;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+        }
+        
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+        
+        #ui {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            color: #8a8a8a;
+            font-size: 12px;
+            letter-spacing: 2px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        #ui span {
+            color: #c4a35a;
+        }
+        
+        #controls {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+        
+        button {
+            background: rgba(196, 163, 90, 0.1);
+            border: 1px solid rgba(196, 163, 90, 0.3);
+            color: #c4a35a;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        button:hover {
+            background: rgba(196, 163, 90, 0.2);
+            border-color: #c4a35a;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div>SEEDS PLANTED: <span id="seedCount">0</span></div>
+        <div>NODES ACTIVE: <span id="nodeCount">0</span></div>
+        <div style="margin-top: 10px; color: #5a5a5a;">CLICK TO PLANT • WATCH IT GROW</div>
+    </div>
+    
+    <div id="controls">
+        <button onclick="clearCanvas()">Clear</button>
+        <button onclick="plantRandom()">Random Seed</button>
+        <button onclick="togglePause()">Pause</button>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let seeds = [];
+        let nodes = [];
+        let particles = [];
+        let paused = false;
+        let frame = 0;
+        
+        // Color palettes for different growth types
+        const palettes = [
+            { main: '#c4a35a', secondary: '#8b7355', accent: '#d4af37' }, // Gold/bronze
+            { main: '#7a8b99', secondary: '#4a5568', accent: '#a0aec0' }, // Steel/blue
+            { main: '#8b9a6d', secondary: '#5a6b47', accent: '#a8b896' }, // Moss/green
+            { main: '#9a7b7b', secondary: '#6b4e4e', accent: '#b8a0a0' }, // Rust/pink
+        ];
+        
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+        
+        class Seed {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.palette = palettes[Math.floor(Math.random() * palettes.length)];
+                this.age = 0;
+                this.growthRate = 0.5 + Math.random() * 0.5;
+                this.maxNodes = 80 + Math.floor(Math.random() * 120);
+                this.nodes = [];
+                this.active = true;
+                
+                // Create initial node
+                this.addNode(x, y, null, 1);
+            }
+            
+            addNode(x, y, parent, generation) {
+                const node = {
+                    x, y,
+                    parent,
+                    generation,
+                    age: 0,
+                    thickness: Math.max(1, 8 - generation * 0.8),
+                    children: [],
+                    splitCooldown: 0,
+                    energy: 100,
+                    angle: parent ? parent.angle + (Math.random() - 0.5) * 0.8 : -Math.PI / 2
+                };
+                
+                if (parent) {
+                    parent.children.push(node);
+                }
+                
+                this.nodes.push(node);
+                nodes.push(node);
+                
+                return node;
+            }
+            
+            grow() {
+                if (!this.active) return;
+                
+                this.age++;
+                
+                // Grow from tips (nodes without children or with room for more)
+                const tips = this.nodes.filter(n => n.children.length < 3 && n.energy > 20);
+                
+                tips.forEach(tip => {
+                    tip.age++;
+                    tip.splitCooldown = Math.max(0, tip.splitCooldown - 1);
+                    
+                    // Consume energy
+                    tip.energy -= 0.2;
+                    
+                    // Grow if conditions right
+                    if (tip.energy > 30 && tip.splitCooldown === 0 && Math.random() < 0.3) {
+                        const angle = tip.angle + (Math.random() - 0.5) * 1.2;
+                        const length = 15 + Math.random() * 25;
+                        const newX = tip.x + Math.cos(angle) * length;
+                        const newY = tip.y + Math.sin(angle) * length;
+                        
+                        // Check bounds
+                        if (newX > 50 && newX < width - 50 && newY > 50 && newY < height - 50) {
+                            const child = this.addNode(newX, newY, tip, tip.generation + 1);
+                            child.angle = angle;
+                            child.energy = tip.energy * 0.7;
+                            tip.energy *= 0.6;
+                            tip.splitCooldown = 20 + Math.floor(Math.random() * 30);
+                            
+                            // Emit particles at growth point
+                            emitParticles(newX, newY, this.palette.accent);
+                        }
+                    }
+                    
+                    // Chance to split into two
+                    if (tip.energy > 60 && tip.generation < 6 && tip.children.length === 0 && Math.random() < 0.05) {
+                        for (let i = 0; i < 2; i++) {
+                            const angle = tip.angle + (i === 0 ? -0.5 : 0.5) + (Math.random() - 0.5) * 0.4;
+                            const length = 12 + Math.random() * 18;
+                            const newX = tip.x + Math.cos(angle) * length;
+                            const newY = tip.y + Math.sin(angle) * length;
+                            
+                            if (newX > 50 && newX < width - 50 && newY > 50 && newY < height - 50) {
+                                const child = this.addNode(newX, newY, tip, tip.generation + 1);
+                                child.angle = angle;
+                                child.energy = tip.energy * 0.5;
+                            }
+                        }
+                        tip.energy *= 0.3;
+                    }
+                });
+                
+                // Stop if too old or too many nodes
+                if (this.age > 2000 || this.nodes.length > this.maxNodes) {
+                    this.active = false;
+                }
+            }
+        }
+        
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = 1;
+                this.decay = 0.01 + Math.random() * 0.02;
+                this.color = color;
+                this.size = 1 + Math.random() * 2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                this.vy -= 0.02; // float up
+            }
+            
+            draw() {
+                ctx.globalAlpha = this.life * 0.6;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        function emitParticles(x, y, color) {
+            for (let i = 0; i < 3; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+        
+        function drawStructure() {
+            // Draw all connections first
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            seeds.forEach(seed => {
+                seed.nodes.forEach(node => {
+                    if (node.parent) {
+                        ctx.beginPath();
+                        ctx.moveTo(node.parent.x, node.parent.y);
+                        ctx.lineTo(node.x, node.y);
+                        ctx.strokeStyle = seed.palette.secondary;
+                        ctx.lineWidth = node.thickness;
+                        ctx.globalAlpha = 0.6;
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                });
+            });
+            
+            // Draw nodes
+            seeds.forEach(seed => {
+                seed.nodes.forEach(node => {
+                    const alpha = Math.max(0.3, node.energy / 100);
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = seed.palette.main;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.thickness * 0.6, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Glow for active tips
+                    if (node.children.length === 0 && node.energy > 30) {
+                        ctx.globalAlpha = alpha * 0.3;
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, node.thickness * 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+            });
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawSeeds() {
+            seeds.forEach(seed => {
+                // Seed core glow
+                ctx.globalAlpha = 0.4;
+                ctx.fillStyle = seed.palette.accent;
+                ctx.beginPath();
+                ctx.arc(seed.x, seed.y, 20, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                ctx.arc(seed.x, seed.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        function updateUI() {
+            document.getElementById('seedCount').textContent = seeds.length;
+            document.getElementById('nodeCount').textContent = nodes.length;
+        }
+        
+        function animate() {
+            if (!paused) {
+                // Fade effect for trails
+                ctx.fillStyle = 'rgba(10, 10, 12, 0.03)';
+                ctx.fillRect(0, 0, width, height);
+                
+                // Grow seeds
+                seeds.forEach(seed => seed.grow());
+                
+                // Update particles
+                particles = particles.filter(p => {
+                    p.update();
+                    p.draw();
+                    return p.life > 0;
+                });
+                
+                drawStructure();
+                drawSeeds();
+                
+                updateUI();
+                frame++;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Controls
+        function clearCanvas() {
+            seeds = [];
+            nodes = [];
+            particles = [];
+            ctx.fillStyle = '#0a0a0c';
+            ctx.fillRect(0, 0, width, height);
+        }
+        
+        function plantRandom() {
+            const x = 100 + Math.random() * (width - 200);
+            const y = 100 + Math.random() * (height - 200);
+            const seed = new Seed(x, y);
+            seeds.push(seed);
+        }
+        
+        function togglePause() {
+            paused = !paused;
+        }
+        
+        // Click to plant
+        canvas.addEventListener('click', (e) => {
+            const seed = new Seed(e.clientX, e.clientY);
+            seeds.push(seed);
+        });
+        
+        // Auto-plant a few seeds to start
+        setTimeout(() => {
+            plantRandom();
+            setTimeout(plantRandom, 500);
+            setTimeout(plantRandom, 1000);
+        }, 500);
+        
+        // Start
+        ctx.fillStyle = '#0a0a0c';
+        ctx.fillRect(0, 0, width, height);
+        animate();
+    </script>
+</body>
+</html>

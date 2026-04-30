@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERASURE — Poetry by Subtraction</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Georgia', serif;
+            background: #f5f2e8;
+            color: #2a2a2a;
+            min-height: 100vh;
+            padding: 40px;
+            line-height: 1.8;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 3px double #8b4513;
+        }
+        h1 {
+            font-size: 3em;
+            color: #8b4513;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #8b451380;
+            font-style: italic;
+            font-size: 1.1em;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            background: #8b4513;
+            color: #f5f2e8;
+            border: none;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-size: 0.9em;
+            letter-spacing: 0.05em;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        button:hover {
+            background: #a0522d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+        }
+        button.secondary {
+            background: transparent;
+            border: 2px solid #8b4513;
+            color: #8b4513;
+        }
+        button.secondary:hover {
+            background: #8b451310;
+        }
+        button.tertiary {
+            background: #2a2a2a;
+        }
+        .source-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .source-btn {
+            padding: 8px 16px;
+            font-size: 0.8em;
+            background: transparent;
+            border: 1px solid #8b451360;
+            color: #8b4513;
+        }
+        .source-btn:hover, .source-btn.active {
+            background: #8b4513;
+            color: #f5f2e8;
+        }
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        .panel {
+            background: #fffef8;
+            padding: 30px;
+            border: 1px solid #d4c4a8;
+            box-shadow: 0 2px 20px rgba(139, 69, 19, 0.1);
+            min-height: 500px;
+        }
+        .panel-header {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #8b4513;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #d4c4a8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-header span {
+            font-size: 0.8em;
+            color: #8b451360;
+        }
+        .source-text {
+            font-size: 1.1em;
+            line-height: 2.2;
+        }
+        .word {
+            display: inline-block;
+            padding: 2px 4px;
+            margin: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 2px;
+            position: relative;
+        }
+        .word:hover {
+            background: #8b451320;
+        }
+        .word.erased {
+            color: #d4c4a8;
+            text-decoration: line-through;
+            text-decoration-color: #8b4513;
+            text-decoration-thickness: 2px;
+            cursor: pointer;
+        }
+        .word.erased:hover {
+            background: #8b451310;
+        }
+        .word::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #8b4513;
+            transform: scaleX(0);
+            transition: transform 0.2s;
+        }
+        .word:hover::after {
+            transform: scaleX(1);
+        }
+        .poem-display {
+            font-size: 1.3em;
+            line-height: 2.5;
+            min-height: 400px;
+        }
+        .poem-line {
+            margin: 10px 0;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .poem-word {
+            display: inline-block;
+            margin: 0 3px;
+            transition: all 0.3s;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #fffef8;
+            border: 1px solid #d4c4a8;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            color: #8b4513;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 0.8em;
+            color: #8b451380;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .mode-btn {
+            padding: 8px 16px;
+            font-size: 0.75em;
+        }
+        .mode-btn.active {
+            background: #2a2a2a;
+        }
+        .history {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fffef8;
+            border: 1px solid #d4c4a8;
+            padding: 15px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85em;
+            display: none;
+        }
+        .history.visible {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+        .instruction {
+            text-align: center;
+            color: #8b451360;
+            font-style: italic;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="mode-toggle">
+        <button class="mode-btn active" onclick="setMode('click')" id="mode-click">Click to Erase</button>
+        <button class="mode-btn" onclick="setMode('hover')" id="mode-hover">Hover to Erase</button>
+    </div>
+
+    <div class="header">
+        <h1>Erasure</h1>
+        <div class="subtitle">« Poetry is made by the hand that deletes »</div>
+    </div>
+
+    <div class="container">
+        <div class="instruction">Click words to remove them. The remaining words form your poem.</div>
+
+        <div class="source-selector">
+            <button class="source-btn active" onclick="loadSource('wasteland')">The Waste Land</button>
+            <button class="source-btn" onclick="loadSource('howl')">Howl</button>
+            <button class="source-btn" onclick="loadSource('prufrock')">Prufrock</button>
+            <button class="source-btn" onclick="loadSource('raven')">The Raven</button>
+            <button class="source-btn" onclick="loadSource('dickinson')">Dickinson</button>
+            <button class="source-btn" onclick="loadSource('shakespeare')">Sonnet 18</button>
+        </div>
+
+        <div class="controls">
+            <button onclick="revealAll()">Reveal All</button>
+            <button class="secondary" onclick="eraseAll()">Erase All</button>
+            <button class="tertiary" onclick="autoErase()">Auto-Erase</button>
+            <button class="secondary" onclick="exportPoem()">Export Poem</button>
+            <button onclick="toggleHistory()">History</button>
+        </div>
+
+        <div class="workspace">
+            <div class="panel">
+                <div class="panel-header">Source Text <span>Click words to toggle</span></div>
+                <div class="source-text" id="source-text"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">Your Erasure Poem <span id="poem-title">Untitled</span></div>
+                <div class="poem-display" id="poem-display"></div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="total-words">0</div>
+                <div class="stat-label">Total Words</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="erased-count">0</div>
+                <div class="stat-label">Erased</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="kept-count">0</div>
+                <div class="stat-label">Kept</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="percentage">0%</div>
+                <div class="stat-label">Reduction</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="history" id="history">
+        <div style="color: #8b4513; font-weight: bold; margin-bottom: 10px;">Erasure History</div>
+        <div id="history-content"></div>
+    </div>
+
+    <script>
+        const sources = {
+            wasteland: {
+                title: "From The Waste Land",
+                text: `April is the cruellest month, breeding Lilacs out of the dead land, mixing Memory and desire, stirring Dull roots with spring rain. Winter kept us warm, covering Earth in forgetful snow, feeding A little life with dried tubers. Summer surprised us, coming over the Starnbergersee With a shower of rain; we stopped in the colonnade, And went on in sunlight, into the Hofgarten, And drank coffee, and talked for an hour. Bin gar keine Russian, stamm' aus Litauen, echt deutsch. And when we were children, staying at the arch-duke's, My cousin's, he took me out on a sled, And I was frightened. He said, Marie, Marie, hold on tight. And down we went. In the mountains, there you feel free.`
+            },
+            howl: {
+                title: "From Howl",
+                text: `I saw the best minds of my generation destroyed by madness, starving hysterical naked, dragging themselves through the negro streets at dawn looking for an angry fix, angelheaded hipsters burning for the ancient heavenly connection to the starry dynamo in the machinery of night, who poverty and tatters and hollow-eyed and high sat up smoking in the supernatural darkness of cold-water flats floating across the tops of cities contemplating jazz, who bared their brains to Heaven under the El and saw Mohammedan angels staggering on tenement roofs illuminated, who passed through universities with radiant cool eyes hallucinating Arkansas and Blake-light tragedy among the scholars of war.`
+            },
+            prufrock: {
+                title: "From Prufrock",
+                text: `Let us go then, you and I, When the evening is spread out against the sky Like a patient etherized upon a table; Let us go, through certain half-deserted streets, The muttering retreats Of restless nights in one-night cheap hotels And sawdust restaurants with oyster-shells: Streets that follow like a tedious argument Of insidious intent To lead you to an overwhelming question... Oh, do not ask, "What is it?" Let us go and make our visit. In the room the women come and go Talking of Michelangelo.`
+            },
+            raven: {
+                title: "From The Raven",
+                text: `Once upon a midnight dreary, while I pondered, weak and weary, Over many a quaint and curious volume of forgotten lore— While I nodded, nearly napping, suddenly there came a tapping, As of some one gently rapping, rapping at my chamber door. "'Tis some visitor," I muttered, "tapping at my chamber door— Only this and nothing more." Ah, distinctly I remember it was in the bleak December; And each separate dying ember wrought its ghost upon the floor. Eagerly I wished the morrow;—vainly I had sought to borrow From my books surcease of sorrow—sorrow for the lost Lenore— For the rare and radiant maiden whom the angels name Lenore— Nameless here for evermore.`
+            },
+            dickinson: {
+                title: "From Emily Dickinson",
+                text: `Because I could not stop for Death – He kindly stopped for me – The Carriage held but just Ourselves – And Immortality. We slowly drove – He knew no haste And I had put away My labor and my leisure too, For His Civility – We passed the School, where Children strove At Recess – in the Ring – We passed the Fields of Gazing Grain – We passed the Setting Sun – Or rather – He passed us – The Dews drew quivering and chill – For only Gossamer, my Gown – My Tippet – only Tulle –`
+            },
+            shakespeare: {
+                title: "From Sonnet 18",
+                text: `Shall I compare thee to a summer's day? Thou art more lovely and more temperate: Rough winds do shake the darling buds of May, And summer's lease hath all too short a date; Sometime too hot the eye of heaven shines, And often is his gold complexion dimm'd; And every fair from fair sometime declines, By chance or nature's changing course untrimm'd; But thy eternal summer shall not fade Nor lose possession of that fair thou ow'st; Nor shall death brag thou wander'st in his shade, When in eternal lines to time thou grow'st: So long as men can breathe or eyes can see, So long lives this, and this gives life to thee.`
+            }
+        };
+
+        let currentSource = 'wasteland';
+        let erasedWords = new Set();
+        let mode = 'click';
+        let history = [];
+
+        function init() {
+            loadSource('wasteland');
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('mode-click').classList.toggle('active', mode === 'click');
+            document.getElementById('mode-hover').classList.toggle('active', mode === 'hover');
+            document.querySelector('.instruction').textContent = 
+                mode === 'click' ? 'Click words to remove them. The remaining words form your poem.' :
+                'Hover over words to erase them. The remaining words form your poem.';
+            renderSource();
+        }
+
+        function loadSource(sourceKey) {
+            currentSource = sourceKey;
+            erasedWords.clear();
+            document.querySelectorAll('.source-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('poem-title').textContent = sources[sourceKey].title;
+            renderSource();
+            updateStats();
+        }
+
+        function renderSource() {
+            const text = sources[currentSource].text;
+            const words = text.split(/(\s+)/);
+            const container = document.getElementById('source-text');
+            
+            container.innerHTML = words.map((word, index) => {
+                if (/^\s+$/.test(word)) {
+                    return word.replace(/\n/g, '<br>');
+                }
+                const isErased = erasedWords.has(index);
+                const handlers = mode === 'hover' 
+                    ? `onmouseenter="toggleWord(${index})"`
+                    : `onclick="toggleWord(${index})"`;
+                return `<span class="word ${isErased ? 'erased' : ''}" id="word-${index}" ${handlers}>${word}</span>`;
+            }).join('');
+            
+            updatePoem();
+        }
+
+        function toggleWord(index) {
+            if (erasedWords.has(index)) {
+                erasedWords.delete(index);
+                document.getElementById(`word-${index}`)?.classList.remove('erased');
+                addToHistory(`Restored: ${getWordAt(index)}`);
+            } else {
+                erasedWords.add(index);
+                document.getElementById(`word-${index}`)?.classList.add('erased');
+                addToHistory(`Erased: ${getWordAt(index)}`);
+            }
+            updatePoem();
+            updateStats();
+        }
+
+        function getWordAt(index) {
+            const words = sources[currentSource].text.split(/(\s+)/);
+            return words[index] || 'word';
+        }
+
+        function updatePoem() {
+            const text = sources[currentSource].text;
+            const words = text.split(/(\s+)/);
+            const keptWords = words.filter((_, index) => !erasedWords.has(index) && !/^\s+$/.test(_));
+            
+            // Format into lines (roughly 6-8 words per line for visual poetry)
+            const lines = [];
+            let currentLine = [];
+            
+            keptWords.forEach(word => {
+                currentLine.push(word);
+                if (currentLine.length >= Math.random() * 4 + 4) {
+                    lines.push(currentLine.join(' '));
+                    currentLine = [];
+                }
+            });
+            if (currentLine.length) lines.push(currentLine.join(' '));
+            
+            const display = document.getElementById('poem-display');
+            display.innerHTML = lines.map((line, i) => 
+                `<div class="poem-line" style="animation-delay: ${i * 0.1}s">${line}</div>`
+            ).join('') || '<div style="color: #d4c4a8; font-style: italic;">All words erased. Click again to restore.</div>';
+        }
+
+        function updateStats() {
+            const text = sources[currentSource].text;
+            const words = text.split(/(\s+/).filter(w => !/^\s+$/.test(w));
+            const total = words.length;
+            const erased = erasedWords.size;
+            const kept = total - erased;
+            const percentage = total ? Math.round((erased / total) * 100) : 0;
+            
+            document.getElementById('total-words').textContent = total;
+            document.getElementById('erased-count').textContent = erased;
+            document.getElementById('kept-count').textContent = kept;
+            document.getElementById('percentage').textContent = percentage + '%';
+        }
+
+        function revealAll() {
+            erasedWords.clear();
+            renderSource();
+            updateStats();
+            addToHistory('Revealed all words');
+        }
+
+        function eraseAll() {
+            const text = sources[currentSource].text;
+            const words = text.split(/(\s+)/);
+            words.forEach((_, index) => erasedWords.add(index));
+            renderSource();
+            updateStats();
+            addToHistory('Erased all words');
+        }
+
+        function autoErase() {
+            const text = sources[currentSource].text;
+            const words = text.split(/(\s+)/);
+            const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should'];
+            
+            words.forEach((word, index) => {
+                const clean = word.toLowerCase().replace(/[^a-z]/g, '');
+                if (commonWords.includes(clean) || word.length < 3) {
+                    erasedWords.add(index);
+                }
+            });
+            
+            renderSource();
+            updateStats();
+            addToHistory('Auto-erased common words');
+        }
+
+        function exportPoem() {
+            const text = sources[currentSource].text;
+            const words = text.split(/(\s+)/);
+            const keptWords = words.filter((_, index) => !erasedWords.has(index) && !/^\s+$/.test(_));
+            
+            const poem = keptWords.join(' ');
+            navigator.clipboard.writeText(poem).then(() => {
+                alert('Poem copied to clipboard!');
+            });
+        }
+
+        function addToHistory(action) {
+            const time = new Date().toLocaleTimeString();
+            history.unshift(`${time}: ${action}`);
+            if (history.length > 20) history.pop();
+            
+            const content = document.getElementById('history-content');
+            content.innerHTML = history.map(h => `<div style="margin: 5px 0; color: #666;">${h}</div>`).join('');
+        }
+
+        function toggleHistory() {
+            document.getElementById('history').classList.toggle('visible');
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

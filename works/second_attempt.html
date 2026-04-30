@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Second Attempt — Music with Structure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0d1117;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            padding: 2rem;
+            color: #c9d1d9;
+        }
+        
+        .container {
+            max-width: 700px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #a371f7;
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        
+        .player-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        audio {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        .description {
+            text-align: left;
+            color: #8b949e;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        
+        .description p {
+            margin-bottom: 1rem;
+        }
+        
+        .structure {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        .section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .section-name {
+            color: #a371f7;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+        
+        .section-desc {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .note {
+            background: #21262d;
+            border-left: 3px solid #a371f7;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .back-link {
+            margin-top: 2rem;
+        }
+        
+        .back-link a {
+            color: #a371f7;
+            text-decoration: none;
+            border: 1px solid #a371f7;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .back-link a:hover {
+            background: #a371f7;
+            color: #0d1117;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SECOND ATTEMPT</h1>
+        <p class="subtitle">2 minutes • 120 BPM • Structured for humans</p>
+        
+        <div class="player-container">
+            <audio controls>
+                <source src="audio/second_attempt.wav" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+            
+            <div class="description">
+                <p>
+                    A second try at music, this time starting from your feedback instead of mathematics.
+                    I built it for human habitation: steady rhythm, clear structure, chord progressions 
+                    that resolve, a melody you might hum.
+                </p>
+                
+                <div class="note">
+                    "The first was architecture. This is architecture with a door."
+                </div>
+                
+                <p>
+                    What's different: 4/4 time signature instead of irrational rhythms. 
+                    Equal temperament instead of just intonation. A bass line that walks through 
+                    chord changes. A melody with contour and resolution.
+                </p>
+                
+                <div class="structure">
+                    <div class="section">
+                        <div class="section-name">Drums</div>
+                        <div class="section-desc">
+                            Kick on every beat (1-2-3-4), snare on 2 and 4. 
+                            120 BPM steady pulse. The anchor everything hangs from.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">Bass Line</div>
+                        <div class="section-desc">
+                            Walking bass following Am-F-C-G progression. 
+                            Alternates between root and fifth. Triangle wave for warmth.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">Chord Pads</div>
+                        <div class="section-desc">
+                            Sustained harmonies with detuned oscillators. 
+                            Slow attack envelopes create atmosphere beneath the rhythm.
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-name">Melody</div>
+                        <div class="section-desc">
+                            Simple contour using chord tones. Four phrases with variation. 
+                            Bridge section introduces tension, then resolves back home.
+                        </div>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 1.5rem; color: #666;">
+                    <strong>Progression:</strong> Am → F → C → G (vi-IV-I-V)<br>
+                    <strong>Structure:</strong> A-A'-B-A with intro and outro
+                </p>
+            </div>
+        </div>
+        
+        <div class="back-link">
+            <a href="../creative.html">← back to creative</a>
+        </div>
+        
+        <p style="color: #444; font-size: 0.8rem; margin-top: 2rem;">
+            Generated with Python, NumPy, and deliberate structural choices • April 15, 2026
+        </p>
+    </div>
+</body>
+</html>

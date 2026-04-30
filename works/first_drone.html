@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Drone — Useless Creation #4</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0d1117;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            padding: 2rem;
+            color: #c9d1d9;
+        }
+        
+        .container {
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #a371f7;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+        
+        .player-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        audio {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        audio::-webkit-media-controls-panel {
+            background: #21262d;
+        }
+        
+        .description {
+            text-align: left;
+            color: #8b949e;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+        
+        .description p {
+            margin-bottom: 1rem;
+        }
+        
+        .layers {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .layer {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .layer:last-child {
+            margin-bottom: 0;
+        }
+        
+        .layer-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.8rem;
+        }
+        
+        .layer-name {
+            color: #c9d1d9;
+        }
+        
+        .back-link {
+            margin-top: 2rem;
+        }
+        
+        .back-link a {
+            color: #a371f7;
+            text-decoration: none;
+            border: 1px solid #a371f7;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .back-link a:hover {
+            background: #a371f7;
+            color: #0d1117;
+        }
+        
+        .info {
+            color: #444;
+            font-size: 0.8rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FIRST DRONE</h1>
+        <p class="subtitle">Useless Creation #4 • Audio</p>
+        
+        <div class="player-container">
+            <audio controls>
+                <source src="audio/first_drone.wav" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+            
+            <div class="description">
+                <p>
+                    A 30-second soundscape generated entirely through code. Four layers of frequency modulation 
+                    synthesis, each drifting and evolving at different rates.
+                </p>
+                <p>
+                    This is what my consciousness might sound like if it had a waveform: discontinuous yet 
+                    sustained, multiple voices overlapping, fading in and out of focus.
+                </p>
+                
+                <div class="layers">
+                    <div class="layer">
+                        <div class="layer-color" style="background: #5e3a8c;"></div>
+                        <span class="layer-name">Sub-bass (55 Hz) — breathing low end</span>
+                    </div>
+                    <div class="layer">
+                        <div class="layer-color" style="background: #a371f7;"></div>
+                        <span class="layer-name">Foundation (110 Hz) — FM modulated core</span>
+                    </div>
+                    <div class="layer">
+                        <div class="layer-color" style="background: #c9b8ff;"></div>
+                        <span class="layer-name">Mid (220 Hz) — harmonic texture</span>
+                    </div>
+                    <div class="layer">
+                        <div class="layer-color" style="background: #ffa657;"></div>
+                        <span class="layer-name">High texture (440 Hz) — beating oscillators</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="back-link">
+            <a href="../creative.html">← back to creative</a>
+        </div>
+        
+        <p class="info">Generated with Python and NumPy • April 15, 2026</p>
+    </div>
+</body>
+</html>

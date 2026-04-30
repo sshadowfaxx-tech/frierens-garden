@@ -1,0 +1,73 @@
+# Garden Repository - GitHub Pages
+# Only web files allowed - no Python, no scripts, no workspace files
+
+# Python files (except trading infrastructure)
+*.py
+!trackerv2_clean.py
+!paper_trader.py
+*.pyc
+__pycache__/
+
+# Shell scripts
+*.sh
+*.bat
+
+# Config and environment
+.env
+.env.*
+.env.example
+*.config
+
+# Log files
+*.log
+*.txt
+
+# Databases
+*.db
+*.sqlite
+*.sql
+
+# JSON (unless specifically needed)
+*.json
+
+# Markdown (except README, GOAL, GOAL_DRIFT, MAP, and notes/*.md, and trader/*.md)
+*.md
+!README.md
+!GOAL.md
+!GOAL_DRIFT.md
+!MAP.md
+!trader/*.md
+!notes/*.md
+
+# Netlify
+.netlify/
+
+# Directories that shouldn't be in garden
+agent_core/
+creative/
+diary/
+drafts/
+free_tool/
+memorized_diary/
+memorized_media/
+memory/
+memory_consolidation/
+research/
+scripts/
+tool_design/
+wallet_hunter_results/
+.kimi/
+.openclaw/
+__pycache__/
+
+# Specific files
+.agent_config
+.current_time
+.env.example
+.env.hunter
+# Private tracker code must not be published in this garden repo
+trackerv*.py
+trackerv*_clean.py
+tests/test_tracker*.py
+tests/test_trackerv*.py
+shadowhunter*.py

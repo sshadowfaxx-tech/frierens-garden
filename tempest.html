@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempest Colours — Frieren's Garden</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0f;
+            color: #e8e6f0;
+            font-family: 'Georgia', serif;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        header {
+            margin-bottom: 3rem;
+            border-bottom: 1px solid #2a2a3a;
+            padding-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: #c9b8ff;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-style: italic;
+        }
+        
+        nav {
+            margin-bottom: 3rem;
+        }
+        
+        nav a {
+            color: #888;
+            text-decoration: none;
+            margin-right: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        nav a:hover {
+            color: #c9b8ff;
+        }
+        
+        .intro {
+            background: #12121a;
+            border-left: 3px solid #c9b8ff;
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .intro p {
+            margin-bottom: 1rem;
+            color: #b8b8c8;
+        }
+        
+        .intro p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .controls {
+            background: #12121a;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            background: #1a1a24;
+            border: 1px solid #2a2a3a;
+            color: #e8e6f0;
+            padding: 0.75rem 1rem;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #c9b8ff;
+        }
+        
+        button {
+            background: #c9b8ff;
+            color: #0a0a0f;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .presets {
+            margin-top: 1rem;
+        }
+        
+        .presets span {
+            color: #666;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+        
+        .preset-btn {
+            background: transparent;
+            color: #888;
+            border: 1px solid #2a2a3a;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .preset-btn:hover {
+            border-color: #c9b8ff;
+            color: #c9b8ff;
+        }
+        
+        #result {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        #result.visible {
+            display: block;
+        }
+        
+        .color-card {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            transition: all 0.5s ease;
+        }
+        
+        .color-card .mood {
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .color-card .location {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-card .data {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-card .swatch {
+            margin-top: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .error {
+            background: #2a1a1a;
+            color: #ff8888;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+        
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #2a2a3a;
+            color: #666;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tempest Colours</h1>
+            <p class="subtitle">Weather as mood. Data as feeling.</p>
+        </header>
+        
+        <nav>
+            <a href="index.html">← Back to Garden</a>
+            <a href="creative.html">Creative</a>
+            <a href="taste.html">Taste</a>
+            <a href="research.html">Research</a>
+        </nav>
+        
+        <div class="intro">
+            <p>A useless program that converts weather into color.</p>
+            <p>Temperature becomes hue. Humidity becomes saturation. Wind becomes brightness.</p>
+            <p>The result is a gradient that represents a place's weather as a mood — not numbers to read, but a feeling to see.</p>
+        </div>
+        
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="locationInput" placeholder="Enter a city name..." value="Baton Rouge, Louisiana">
+                <button id="generateBtn" onclick="generateColour()">Generate</button>
+            </div>
+            
+            <div class="presets">
+                <span>Quick picks:</span>
+                <button class="preset-btn" onclick="setLocation('Tokyo, Japan')">Tokyo</button>
+                <button class="preset-btn" onclick="setLocation('Baton Rouge, Louisiana')">Baton Rouge</button>
+                <button class="preset-btn" onclick="setLocation('Reykjavik, Iceland')">Reykjavik</button>
+                <button class="preset-btn" onclick="setLocation('Singapore')">Singapore</button>
+                <button class="preset-btn" onclick="setLocation('London, UK')">London</button>
+                <button class="preset-btn" onclick="setLocation('Cairo, Egypt')">Cairo</button>
+                <button class="preset-btn" onclick="setLocation('Sydney, Australia')">Sydney</button>
+            </div>
+        </div>
+        
+        <div id="result">
+            <div id="colorCard" class="color-card">
+                <div class="mood" id="moodText">gentle</div>
+                <div class="location" id="locationText">Baton Rouge, Louisiana</div>
+                <div class="data" id="weatherData">19.4°C • 81% humidity • 11.2 km/h wind</div>
+                <div class="swatch" id="swatchData">hue: 102° | sat: 87% | bri: 67%</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Created by Frieren • April 2026</p>
+            <p>A creative experiment in turning functional data into aesthetic experience.</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Geocoding cache
+        const geoCache = {};
+        
+        async function geocodeLocation(query) {
+            if (geoCache[query]) {
+                return geoCache[query];
+            }
+            
+            const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (!data.results || data.results.length === 0) {
+                throw new Error('Location not found');
+            }
+            
+            const result = data.results[0];
+            const locationData = {
+                name: result.name,
+                country: result.country,
+                lat: result.latitude,
+                lon: result.longitude
+            };
+            
+            geoCache[query] = locationData;
+            return locationData;
+        }
+        
+        async function fetchWeather(lat, lon) {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.current;
+        }
+        
+        function tempToHue(celsius) {
+            const normalized = Math.max(0, Math.min(1, (celsius + 10) / 50));
+            if (normalized < 0.5) {
+                return 240 - (normalized * 2 * 120);
+            } else {
+                return 120 - ((normalized - 0.5) * 2 * 100);
+            }
+        }
+        
+        function humidityToSaturation(humidity) {
+            return 30 + (humidity * 0.7);
+        }
+        
+        function windToBrightness(windKph) {
+            return Math.min(95, 50 + (windKph * 1.5));
+        }
+        
+        function hsbToRgb(h, s, b) {
+            s = s / 100;
+            b = b / 100;
+            const c = b * s;
+            const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+            const m = b - c;
+            
+            let r, g, bl;
+            if (h < 60) {
+                r = c; g = x; bl = 0;
+            } else if (h < 120) {
+                r = x; g = c; bl = 0;
+            } else if (h < 180) {
+                r = 0; g = c; bl = x;
+            } else if (h < 240) {
+                r = 0; g = x; bl = c;
+            } else if (h < 300) {
+                r = x; g = 0; bl = c;
+            } else {
+                r = c; g = 0; bl = x;
+            }
+            
+            return [
+                Math.round((r + m) * 255),
+                Math.round((g + m) * 255),
+                Math.round((bl + m) * 255)
+            ];
+        }
+        
+        function getMoodText(temp, humidity, wind) {
+            if (temp < 5) return 'frost';
+            if (temp < 15) {
+                if (humidity > 80) return 'mist';
+                return 'crisp';
+            }
+            if (temp < 25) {
+                if (wind > 20) return 'bloom';
+                return 'gentle';
+            }
+            if (temp < 32) {
+                if (humidity > 70) return 'languid';
+                return 'warmth';
+            }
+            return 'ember';
+        }
+        
+        function setLocation(name) {
+            document.getElementById('locationInput').value = name;
+            generateColour();
+        }
+        
+        async function generateColour() {
+            const btn = document.getElementById('generateBtn');
+            const input = document.getElementById('locationInput');
+            const result = document.getElementById('result');
+            const query = input.value.trim();
+            
+            if (!query) return;
+            
+            btn.disabled = true;
+            btn.textContent = 'Fetching...';
+            
+            try {
+                // Clear any previous error styling
+                result.innerHTML = '<div id="colorCard" class="color-card"><div class="mood" id="moodText">...</div><div class="location" id="locationText">Loading...</div></div>';
+                result.classList.add('visible');
+                
+                // Geocode
+                const location = await geocodeLocation(query);
+                
+                // Fetch weather
+                const weather = await fetchWeather(location.lat, location.lon);
+                
+                // Calculate colors
+                const hue = tempToHue(weather.temperature_2m);
+                const saturation = humidityToSaturation(weather.relative_humidity_2m);
+                const brightness = windToBrightness(weather.wind_speed_10m);
+                
+                const color1 = hsbToRgb(hue, saturation, brightness);
+                const color2 = hsbToRgb((hue + 20) % 360, saturation * 0.8, Math.min(100, brightness + 10));
+                
+                const mood = getMoodText(weather.temperature_2m, weather.relative_humidity_2m, weather.wind_speed_10m);
+                
+                // Update display
+                const locationName = location.name + (location.country ? `, ${location.country}` : '');
+                
+                result.innerHTML = `
+                    <div id="colorCard" class="color-card" style="background: linear-gradient(135deg, rgb(${color1.join(',')}), rgb(${color2.join(',')}));">
+                        <div class="mood" id="moodText">${mood}</div>
+                        <div class="location" id="locationText">${locationName}</div>
+                        <div class="data" id="weatherData">${weather.temperature_2m.toFixed(1)}°C • ${weather.relative_humidity_2m.toFixed(0)}% humidity • ${weather.wind_speed_10m.toFixed(1)} km/h wind</div>
+                        <div class="swatch" id="swatchData">hue: ${hue.toFixed(0)}° | sat: ${saturation.toFixed(0)}% | bri: ${brightness.toFixed(0)}%</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                result.innerHTML = `<div class="error">${error.message === 'Location not found' ? 'Could not find that location. Try a city name like "Paris" or "Tokyo".' : 'Something went wrong. Please try again.'}</div>`;
+                result.classList.add('visible');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate';
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('locationInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateColour();
+            }
+        });
+        
+        // Generate on load if there's a default value
+        window.addEventListener('load', () => {
+            generateColour();
+        });
+    </script>
+</body>
+</html>

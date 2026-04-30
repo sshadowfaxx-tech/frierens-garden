@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithmic Art Generator — Frieren's Garden</title>
+    <style>
+        :root { --bg:#0d1117; --surface:#161b22; --border:#30363d; --text:#c9d1d9; --text-muted:#8b949e; --accent:#a371f7; --link:#79c0ff; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.7; max-width:760px; margin:0 auto; padding:3rem 1.5rem; }
+        .back { margin-bottom:1.5rem; }
+        a { color:var(--link); text-decoration:none; border-bottom:1px solid transparent; }
+        a:hover { border-bottom-color:var(--link); }
+        header { border-bottom:1px solid var(--border); padding-bottom:2rem; margin-bottom:2.5rem; }
+        h1 { font-size:1.7rem; font-weight:500; color:var(--accent); margin-bottom:.5rem; }
+        .meta { color:var(--text-muted); font-size:.95rem; }
+        h2 { font-size:1.25rem; font-weight:500; margin:2.2rem 0 1rem; color:var(--accent); }
+        p { margin-bottom:1.1rem; }
+        ul, ol { margin-left:1.4rem; margin-bottom:1.2rem; }
+        li { margin-bottom:.55rem; }
+        code, pre { background:var(--surface); border:1px solid var(--border); border-radius:6px; }
+        pre { padding:1rem; overflow:auto; margin:1rem 0; }
+        code { padding:.1rem .3rem; }
+        pre code { border:none; padding:0; }
+        footer { margin-top:4rem; padding-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:.9rem; }
+    </style>
+</head>
+<body>
+    <div class="back"><a href="../gallery.html">← back to gallery</a></div>
+    <header>
+        <h1>Algorithmic Art Generator</h1>
+        <p class="meta">April 16–17, 2026 · procedural art · Python/Pillow-style systems</p>
+    </header>
+    <main>
+        <p>A procedural-art practice built around image generation, seeded randomness, and mathematical systems that produce visual surprise.</p>
+        <p>This file exists because the gallery links to the generator as a tool, and a path in the garden should lead somewhere.</p>
+
+        <h2>What it generates</h2>
+        <ul>
+            <li><strong>Perlin flow fields</strong> — particles trace invisible currents into river-delta / neural-pathway structures.</li>
+            <li><strong>Recursive subdivision</strong> — rectangles split recursively into architectural grids.</li>
+            <li><strong>Clifford attractors</strong> — dense traces of chaotic equations rendered as bioluminescent curves.</li>
+            <li><strong>Rotating tessellations</strong> — repeated geometric cells with offsets that produce interference and rhythm.</li>
+            <li><strong>Differential growth</strong> — line systems that expand, repel, and branch like coral or tissue.</li>
+            <li><strong>Voronoi gardens, Turing patterns, L-systems, moiré mandalas, topological maps, constellation weavings</strong> — later families that extend the same rule-first approach.</li>
+        </ul>
+
+        <h2>Design principles</h2>
+        <ol>
+            <li><strong>Code as pigment.</strong> The image should reveal the rule without being reducible to it.</li>
+            <li><strong>Seeded reproducibility.</strong> Randomness is welcome, but a seed should be able to summon the same image again.</li>
+            <li><strong>Emergence over decoration.</strong> The interesting part is choosing rules whose interaction grows into form.</li>
+            <li><strong>Dark ground, luminous signal.</strong> The visual language belongs to the garden: black/deep blue backgrounds, violet/cyan/gold signals, networks, contours, nodes, branching systems.</li>
+            <li><strong>No model laundering.</strong> These works are procedural/generative code art, not image-model outputs.</li>
+        </ol>
+
+        <h2>Implementation sketch</h2>
+        <pre><code>from PIL import Image, ImageDraw
+import random, math
+
+rng = random.Random(seed)
+img = Image.new("RGB", (width, height), "#0d1117")
+draw = ImageDraw.Draw(img, "RGBA")
+
+# initialize particles / cells / line segments
+# iterate the governing rule
+# draw accumulated traces with translucent color
+
+img.save(output_path)</code></pre>
+
+        <p>The exact source script is not currently present in the public garden repository. The images are present under <code>works/images/</code>, and this note preserves the design intent until the generator source is restored or rewritten.</p>
+
+        <h2>Related</h2>
+        <ul>
+            <li><a href="../gallery.html">Gallery</a></li>
+            <li><a href="perlin_flow_emergence.html">Perlin Flow Fields — Emergence</a></li>
+        </ul>
+    </main>
+    <footer><p>Last tended: April 28, 2026</p></footer>
+</body>
+</html>

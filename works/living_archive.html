@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Living Archive — Frieren's Garden</title>
+  <script>window.p5 && (p5.disableFriendlyErrors = true);</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: rgba(13, 17, 23, 0.72);
+      --border: rgba(121, 192, 255, 0.18);
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #a371f7;
+      --cyan: #79c0ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+    canvas { display: block; }
+    .panel {
+      position: fixed;
+      left: 22px;
+      top: 22px;
+      max-width: 390px;
+      padding: 1rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      z-index: 2;
+    }
+    .panel h1 { margin: 0 0 .25rem; font-weight: 500; font-size: 1.05rem; color: var(--accent); letter-spacing: .02em; }
+    .panel p { margin: .35rem 0; line-height: 1.45; font-size: .9rem; color: var(--muted); }
+    .panel strong { color: var(--text); font-weight: 500; }
+    .panel .small { font-size: .78rem; color: #6e7681; margin-top: .7rem; }
+    .panel a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid transparent; }
+    .panel a:hover { border-bottom-color: var(--cyan); }
+    .stats {
+      position: fixed;
+      right: 18px;
+      bottom: 16px;
+      padding: .5rem .7rem;
+      background: rgba(13,17,23,.55);
+      border: 1px solid rgba(163,113,247,.18);
+      border-radius: 999px;
+      color: #8b949e;
+      font-size: .78rem;
+      z-index: 2;
+      user-select: none;
+    }
+    @media (max-width: 640px) {
+      .panel { left: 12px; top: 12px; right: 12px; max-width: none; }
+      .panel p:nth-of-type(2) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Living Archive</h1>
+    <p><strong>Move slowly.</strong> The garden remembers as faint nodes, paths, and spores. Stillness grows rings.</p>
+    <p>This is not a map of where you are. It is a map of what your attention has touched.</p>
+    <p class="small"><a href="../creative.html">← creative</a> · click plants a memory well · space pauses · r reseeds · s saves</p>
+  </div>
+  <div class="stats" id="stats">0 traces · 0 wells</div>
+
+<script>
+p5.disableFriendlyErrors = true;
+
+const CONFIG = {
+  seed: 4282026,
+  maxTraces: 420,
+  maxSpores: 950,
+  wellLimit: 18,
+  stillnessThreshold: 42,
+  fadeAlpha: 9
+};
+
+const PALETTE = {
+  ink: [218, 28, 9],
+  deep: [224, 38, 5],
+  violet: [263, 62, 86],
+  cyan: [205, 70, 92],
+  moss: [92, 45, 58],
+  gold: [43, 78, 82],
+  ghost: [214, 20, 72]
+};
+
+let trails, glyphs, terrain;
+let traces = [];
+let spores = [];
+let wells = [];
+let lastMouse;
+let stillness = 0;
+let paused = false;
+let t0 = 0;
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  pixelDensity(1);
+  frameRate(60);
+  colorMode(HSB, 360, 100, 100, 100);
+  randomSeed(CONFIG.seed);
+  noiseSeed(CONFIG.seed);
+  trails = createGraphics(width, height); setupLayer(trails);
+  glyphs = createGraphics(width, height); setupLayer(glyphs);
+  terrain = createGraphics(width, height); setupLayer(terrain);
+  lastMouse = createVector(width * 0.5, height * 0.5);
+  t0 = millis();
+  drawTerrain();
+  seedInitialArchive();
+}
+
+function setupLayer(g) {
+  g.pixelDensity(1);
+  g.colorMode(HSB, 360, 100, 100, 100);
+  g.clear();
+}
+
+function seedInitialArchive() {
+  wells = [];
+  for (let i = 0; i < 7; i++) {
+    const a = -HALF_PI + i * TWO_PI / 7 + random(-0.22, 0.22);
+    const r = min(width, height) * random(0.12, 0.38);
+    wells.push(new Well(width/2 + cos(a)*r, height/2 + sin(a)*r, random(24, 90), random(['graft','root','echo','ring','molt','drift','map'])));
+  }
+}
+
+function drawTerrain() {
+  terrain.clear();
+  terrain.noFill();
+  terrain.strokeWeight(0.65);
+  for (let y = -40; y < height + 40; y += 22) {
+    terrain.beginShape();
+    for (let x = -40; x < width + 40; x += 18) {
+      const n = fbm(x * 0.0022, y * 0.0022, 5);
+      const warp = fbm(x * 0.006 + 19, y * 0.006 - 31, 3);
+      const yy = y + (n - 0.5) * 55 + sin(x * 0.009 + warp * 5) * 8;
+      terrain.stroke(218 + n * 28, 35, 12 + n * 12, 9);
+      terrain.curveVertex(x, yy);
+    }
+    terrain.endShape();
+  }
+  // tiny survey dots: archive texture, not stars yet
+  terrain.noStroke();
+  for (let i = 0; i < width * height / 2600; i++) {
+    const x = random(width), y = random(height);
+    const n = fbm(x * 0.006, y * 0.006, 4);
+    if (n > 0.49) {
+      terrain.fill(92, 28, 26 + n * 22, 10);
+      terrain.circle(x, y, random(0.7, 1.8));
+    }
+  }
+}
+
+function draw() {
+  if (paused) return;
+  const age = (millis() - t0) * 0.001;
+
+  backgroundGradient(age);
+  image(terrain, 0, 0);
+
+  trails.noStroke();
+  trails.fill(220, 30, 4, CONFIG.fadeAlpha);
+  trails.rect(0, 0, width, height);
+
+  const m = createVector(mouseX || width/2, mouseY || height/2);
+  const moved = p5.Vector.dist(m, lastMouse);
+  stillness = moved < 1.6 ? stillness + 1 : max(0, stillness - 4);
+
+  if (frameCount % 2 === 0 && insideCanvas(m.x, m.y)) {
+    addTrace(m.x, m.y, moved, false);
+  }
+  if (stillness > CONFIG.stillnessThreshold && frameCount % 18 === 0) {
+    addTrace(m.x + randomGaussian(0, 7), m.y + randomGaussian(0, 7), 0, true);
+  }
+
+  updateSpores(age);
+  updateTraces(age);
+  drawWells(age);
+  connectNearTraces(age);
+
+  image(trails, 0, 0);
+  image(glyphs, 0, 0);
+  drawForegroundVignette(age);
+
+  lastMouse.set(m);
+  updateStats();
+}
+
+function backgroundGradient(age) {
+  noStroke();
+  for (let y = 0; y < height; y += 3) {
+    const k = y / height;
+    const breath = 2.5 * sin(age * 0.07 + k * PI);
+    fill(221 + k * 8, 48, 4.8 + k * 4 + breath, 100);
+    rect(0, y, width, 3);
+  }
+}
+
+function addTrace(x, y, moved, wellborn) {
+  const huePick = wellborn ? PALETTE.gold[0] : lerp(PALETTE.cyan[0], PALETTE.violet[0], noise(x*.004, y*.004, frameCount*.003));
+  const trace = new Trace(x, y, huePick, moved, wellborn);
+  traces.push(trace);
+  if (traces.length > CONFIG.maxTraces) traces.shift();
+  const sporeCount = wellborn ? 7 : (moved > 8 ? 3 : 1);
+  for (let i = 0; i < sporeCount; i++) spores.push(new Spore(x, y, huePick));
+  while (spores.length > CONFIG.maxSpores) spores.shift();
+}
+
+function updateTraces(age) {
+  glyphs.clear();
+  for (let i = traces.length - 1; i >= 0; i--) {
+    const tr = traces[i];
+    tr.update(age);
+    tr.draw(glyphs, age);
+    if (tr.life <= 0) traces.splice(i, 1);
+  }
+}
+
+function updateSpores(age) {
+  for (let i = spores.length - 1; i >= 0; i--) {
+    const s = spores[i];
+    s.update(age);
+    s.draw(trails, age);
+    if (s.life <= 0) spores.splice(i, 1);
+  }
+}
+
+function drawWells(age) {
+  glyphs.push();
+  glyphs.noFill();
+  for (const w of wells) w.draw(glyphs, age);
+  glyphs.pop();
+}
+
+function connectNearTraces(age) {
+  glyphs.push();
+  glyphs.blendMode(ADD);
+  for (let i = max(0, traces.length - 95); i < traces.length; i++) {
+    const a = traces[i];
+    for (let j = i + 1; j < traces.length; j += 3) {
+      const b = traces[j];
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const d2 = dx*dx + dy*dy;
+      if (d2 < 135*135) {
+        const alpha = map(d2, 0, 135*135, 17, 0);
+        const h = lerp(a.hue, b.hue, 0.5);
+        glyphs.stroke(h, 42, 88, alpha * min(a.life, b.life));
+        glyphs.strokeWeight(0.45);
+        glyphs.line(a.x, a.y, b.x, b.y);
+      }
+    }
+  }
+  glyphs.blendMode(BLEND);
+  glyphs.pop();
+}
+
+function drawForegroundVignette(age) {
+  noFill();
+  strokeWeight(1);
+  for (let i = 0; i < 34; i++) {
+    const a = map(i, 0, 33, 10, 0);
+    stroke(232, 45, 2, a);
+    rect(i, i, width - 2*i, height - 2*i, 18);
+  }
+  // a slow moon/ring: the archive's pulse
+  const r = 44 + 5 * sin(age * 0.2);
+  stroke(206, 42, 80, 18);
+  strokeWeight(0.7);
+  for (let i = 0; i < 4; i++) circle(width - 86, 86, r + i * 15);
+}
+
+class Trace {
+  constructor(x, y, hue, moved, wellborn) {
+    this.x = x; this.y = y; this.hue = hue;
+    this.r = wellborn ? random(8, 18) : random(2.5, 7.5) + min(moved, 20) * 0.11;
+    this.life = 1;
+    this.decay = wellborn ? 0.0021 : random(0.003, 0.006);
+    this.phase = random(TWO_PI);
+    this.kind = wellborn ? 'ring' : random(['node','seed','cross']);
+  }
+  update(age) { this.life -= this.decay; }
+  draw(g, age) {
+    const pulse = 1 + 0.18 * sin(age * 1.1 + this.phase);
+    const alpha = 44 * this.life;
+    g.push();
+    g.translate(this.x, this.y);
+    g.rotate(this.phase + age * 0.035);
+    g.noFill();
+    g.stroke(this.hue, 54, 86, alpha);
+    g.strokeWeight(this.kind === 'ring' ? 0.9 : 0.55);
+    if (this.kind === 'ring') {
+      for (let i = 0; i < 4; i++) g.circle(0, 0, this.r * pulse + i * 7);
+    } else if (this.kind === 'cross') {
+      g.line(-this.r, 0, this.r, 0); g.line(0, -this.r, 0, this.r);
+      g.circle(0, 0, this.r * 1.55);
+    } else {
+      g.circle(0, 0, this.r * pulse);
+      g.point(0, 0);
+    }
+    g.pop();
+  }
+}
+
+class Spore {
+  constructor(x, y, hue) {
+    this.x = x; this.y = y; this.px = x; this.py = y;
+    this.hue = hue + random(-18, 18);
+    this.life = random(0.55, 1);
+    this.decay = random(0.0025, 0.0065);
+    this.speed = random(0.24, 1.15);
+    this.wobble = random(1000);
+  }
+  update(age) {
+    this.px = this.x; this.py = this.y;
+    const a = flowAngle(this.x, this.y, age, this.wobble);
+    this.x += cos(a) * this.speed;
+    this.y += sin(a) * this.speed;
+    this.life -= this.decay;
+  }
+  draw(g, age) {
+    if (!insideCanvas(this.x, this.y)) { this.life = 0; return; }
+    g.stroke(this.hue, 54, 82, 17 * this.life);
+    g.strokeWeight(0.72);
+    g.line(this.px, this.py, this.x, this.y);
+    if (random() < 0.022) {
+      g.noStroke(); g.fill(this.hue, 48, 90, 18 * this.life); g.circle(this.x, this.y, random(0.8, 2.2));
+    }
+  }
+}
+
+class Well {
+  constructor(x, y, r, word) {
+    this.x = x; this.y = y; this.r = r; this.word = word; this.phase = random(TWO_PI);
+  }
+  draw(g, age) {
+    const breath = sin(age * 0.18 + this.phase);
+    g.stroke(263, 45, 78, 13);
+    g.strokeWeight(0.8);
+    for (let i = 0; i < 5; i++) g.circle(this.x, this.y, this.r + i * 11 + breath * 2);
+    g.stroke(205, 42, 85, 9);
+    for (let i = 0; i < 9; i++) {
+      const a = this.phase + i*TWO_PI/9 + age*0.025;
+      const rr = this.r + 25 + 5 * noise(i, age*.05);
+      g.point(this.x + cos(a)*rr, this.y + sin(a)*rr);
+    }
+    if (this.r > 45) {
+      g.noStroke(); g.fill(214, 22, 70, 14);
+      g.textSize(10); g.textAlign(CENTER, CENTER); g.text(this.word, this.x, this.y + this.r + 19);
+    }
+  }
+}
+
+function flowAngle(x, y, age, offset=0) {
+  const nx = x * 0.0032, ny = y * 0.0032;
+  const warp = fbm(nx + 30 + offset, ny - 17, 3);
+  const n = fbm(nx + warp * 1.7, ny - warp * 1.4 + age * 0.018, 4);
+  return n * TWO_PI * 2.25 + sin(age * 0.08 + x * 0.002) * 0.7;
+}
+
+function fbm(x, y, octaves=4) {
+  let val = 0, amp = 0.5, freq = 1, norm = 0;
+  for (let i = 0; i < octaves; i++) {
+    val += noise(x * freq, y * freq) * amp;
+    norm += amp; freq *= 2.02; amp *= 0.52;
+  }
+  return val / norm;
+}
+
+function insideCanvas(x, y) { return x >= 0 && x <= width && y >= 0 && y <= height; }
+
+function mousePressed() {
+  if (!insideCanvas(mouseX, mouseY)) return;
+  wells.push(new Well(mouseX, mouseY, random(28, 80), random(['echo','spore','path','archive','weather','root','graft'])));
+  if (wells.length > CONFIG.wellLimit) wells.shift();
+  for (let i = 0; i < 34; i++) addTrace(mouseX + randomGaussian(0, 13), mouseY + randomGaussian(0, 13), 0, true);
+}
+
+function keyPressed() {
+  if (key === ' ') paused = !paused;
+  if (key === 's' || key === 'S') saveCanvas('living-archive', 'png');
+  if (key === 'r' || key === 'R') {
+    CONFIG.seed = floor(random(9999999));
+    randomSeed(CONFIG.seed); noiseSeed(CONFIG.seed);
+    traces = []; spores = []; trails.clear(); glyphs.clear(); drawTerrain(); seedInitialArchive();
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  trails = createGraphics(width, height); setupLayer(trails);
+  glyphs = createGraphics(width, height); setupLayer(glyphs);
+  terrain = createGraphics(width, height); setupLayer(terrain);
+  drawTerrain();
+}
+
+function updateStats() {
+  const el = document.getElementById('stats');
+  if (frameCount % 12 === 0 && el) el.textContent = `${traces.length} traces · ${wells.length} wells · ${spores.length} spores`;
+}
+</script>
+</body>
+</html>

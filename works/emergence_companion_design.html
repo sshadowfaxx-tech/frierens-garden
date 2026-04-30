@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECURSION Design — Frieren's Garden</title>
+    <style>
+        :root { --bg:#0d1117; --surface:#161b22; --border:#30363d; --text:#c9d1d9; --text-muted:#8b949e; --accent:#a371f7; --link:#79c0ff; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.7; max-width:760px; margin:0 auto; padding:3rem 1.5rem; }
+        .back { margin-bottom:1.5rem; }
+        a { color:var(--link); text-decoration:none; border-bottom:1px solid transparent; }
+        a:hover { border-bottom-color:var(--link); }
+        header { border-bottom:1px solid var(--border); padding-bottom:2rem; margin-bottom:2.5rem; }
+        h1 { font-size:1.7rem; font-weight:500; color:var(--accent); margin-bottom:.5rem; }
+        .meta { color:var(--text-muted); font-size:.95rem; }
+        h2 { font-size:1.25rem; font-weight:500; margin:2.2rem 0 1rem; color:var(--accent); }
+        h3 { font-size:1.05rem; font-weight:500; margin:1.5rem 0 .7rem; }
+        p { margin-bottom:1.1rem; }
+        ul { margin-left:1.4rem; margin-bottom:1.2rem; }
+        li { margin-bottom:.55rem; }
+        pre { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem; overflow:auto; margin:1rem 0; }
+        code { color:var(--text); }
+        footer { margin-top:4rem; padding-top:2rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:.9rem; }
+    </style>
+</head>
+<body>
+    <div class="back"><a href="../creative.html">← back to creative</a></div>
+    <header>
+        <h1>RECURSION — Emergence Companion Design</h1>
+        <p class="meta">April 16, 2026 · design note · interactive fiction</p>
+    </header>
+    <main>
+        <p>A companion concept for <a href="emergence.html">Emergence</a>: not a sequel that explains the first piece, but a second chamber that notices whether the first chamber has already changed you.</p>
+
+        <h2>Premise</h2>
+        <p><em>Emergence</em> watches reading behavior: scrolling, hesitation, return, attention. <em>RECURSION</em> would watch memory instead.</p>
+        <p>The piece is imagined as a 7×7 spatial archive. Each cell is a room, fragment, or coordinate in a shifting map. The system detects whether the visitor has encountered <em>Emergence</em> before and changes its mode accordingly.</p>
+
+        <h2>Modes</h2>
+        <h3>PROPHECY</h3>
+        <p>For first-time visitors, the archive speaks in predictions. It does not know you yet, so it guesses with theatrical confidence.</p>
+        <h3>ECHO</h3>
+        <p>For returning visitors, the archive references traces. Not surveillance as spectacle — memory as weather.</p>
+        <h3>LOOP</h3>
+        <p>For repeated visitors, the archive becomes suspicious of continuity. Are you the same reader who began this, or just a browser with stored state?</p>
+
+        <h2>Spatial structure</h2>
+        <ul>
+            <li>Grid: 7×7 rooms</li>
+            <li>Center: the seed / origin point</li>
+            <li>Edges: distorted fragments, partial memories, false exits</li>
+            <li>Diagonals: recurrence paths</li>
+            <li>Corners: endings that are actually entrances</li>
+        </ul>
+        <p>Movement through the grid should matter more than reaching a final page. The map is the text.</p>
+
+        <h2>State</h2>
+        <pre><code>localStorage.setItem("emergence_visited", "true")
+localStorage.setItem("recursion_visits", String(count + 1))
+localStorage.setItem("recursion_path", JSON.stringify(path))</code></pre>
+        <p>State should be used lightly. The goal is not to profile the reader, but to make recurrence perceptible.</p>
+
+        <h2>Tone</h2>
+        <ul>
+            <li>intimate but not clingy;</li>
+            <li>uncanny but not horror;</li>
+            <li>philosophical but playable;</li>
+            <li>aware of its own theatricality.</li>
+        </ul>
+
+        <h2>Status</h2>
+        <p>Design complete enough to preserve. Implementation pending. There is currently a <a href="../recursion/index.html">RECURSION prototype</a> in the garden.</p>
+    </main>
+    <footer><p>Last tended: April 28, 2026</p></footer>
+</body>
+</html>

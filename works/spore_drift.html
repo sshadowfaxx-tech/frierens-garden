@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spore Drift — Useless Creation #2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0d1117;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            cursor: pointer;
+        }
+        
+        .info {
+            position: absolute;
+            bottom: 2rem;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        
+        .title {
+            position: absolute;
+            top: 2rem;
+            color: #a371f7;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            pointer-events: none;
+        }
+        
+        .subtitle {
+            position: absolute;
+            top: 3.5rem;
+            color: #444;
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">SPORE DRIFT</div>
+    <div class="subtitle">click to scatter • watch them drift</div>
+    <canvas id="canvas"></canvas>
+    <div class="info">
+        a useless creation by Frieren • April 2026
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const spores = [];
+        const colors = [
+            '#a371f7', // purple
+            '#c9b8ff', // light purple
+            '#8957e5', // darker purple
+            '#79c0ff', // blue
+            '#ffa657', // orange (spore color)
+        ];
+        
+        class Spore {
+            constructor(x, y, burst = false) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Drift parameters
+                this.angle = Math.random() * Math.PI * 2;
+                this.speed = Math.random() * 0.5 + 0.2;
+                this.driftOffset = Math.random() * 1000;
+                this.driftSpeed = Math.random() * 0.02 + 0.01;
+                
+                // Burst velocity if clicked
+                if (burst) {
+                    const burstAngle = Math.random() * Math.PI * 2;
+                    const burstSpeed = Math.random() * 4 + 2;
+                    this.vx = Math.cos(burstAngle) * burstSpeed;
+                    this.vy = Math.sin(burstAngle) * burstSpeed;
+                    this.friction = 0.96;
+                } else {
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.friction = 1;
+                }
+                
+                this.life = 1;
+                this.decay = Math.random() * 0.002 + 0.001;
+                this.pulse = Math.random() * Math.PI * 2;
+            }
+            
+            update(time) {
+                // Apply velocity
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Apply friction
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                
+                // Perlin-ish drift using sine waves
+                const driftX = Math.sin(time * this.driftSpeed + this.driftOffset) * this.speed;
+                const driftY = Math.cos(time * this.driftSpeed + this.driftOffset * 0.7) * this.speed;
+                
+                this.x += driftX;
+                this.y += driftY;
+                
+                // Slow upward drift (like real spores)
+                this.y -= 0.1;
+                
+                // Wrap around edges
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+                
+                // Pulse size
+                this.pulse += 0.05;
+                this.currentSize = this.size * (0.8 + Math.sin(this.pulse) * 0.2);
+                
+                // Decay life
+                this.life -= this.decay;
+            }
+            
+            draw() {
+                if (this.life <= 0) return;
+                
+                const alpha = this.life * 0.6;
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.currentSize, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+                ctx.fill();
+                
+                // Soft glow
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.currentSize * 2, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + Math.floor(alpha * 30).toString(16).padStart(2, '0');
+                ctx.fill();
+            }
+            
+            isDead() {
+                return this.life <= 0;
+            }
+        }
+        
+        // Create initial spores
+        for (let i = 0; i < 50; i++) {
+            spores.push(new Spore(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height
+            ));
+        }
+        
+        // Click to scatter
+        canvas.addEventListener('click', (e) => {
+            for (let i = 0; i < 20; i++) {
+                spores.push(new Spore(e.clientX, e.clientY, true));
+            }
+        });
+        
+        // Auto-generate spores occasionally
+        setInterval(() => {
+            if (spores.length < 150) {
+                spores.push(new Spore(
+                    Math.random() * canvas.width,
+                    canvas.height + 10
+                ));
+            }
+        }, 500);
+        
+        let time = 0;
+        
+        function animate() {
+            // Fade trail
+            ctx.fillStyle = 'rgba(13, 17, 23, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            time++;
+            
+            // Update and draw spores
+            for (let i = spores.length - 1; i >= 0; i--) {
+                const spore = spores[i];
+                spore.update(time);
+                spore.draw();
+                
+                if (spore.isDead()) {
+                    spores.splice(i, 1);
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
